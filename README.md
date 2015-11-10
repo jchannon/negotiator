@@ -1,6 +1,6 @@
 # Negotiator
 
-This is a libary that handles content negotiation in web applications written in Golang.
+This is a libary that handles content negotiation in web applications written in Go.
 
 ## Usage
 
@@ -8,7 +8,7 @@ To return JSON/XML out of the box simple put this in your route handler:
 ```
 func getUser(w http.ResponseWriter, req *http.Request) {
     user := &User{"Joe","Bloggs"}
-    negotiator.Negotiate(w,req,model)
+    negotiator.Negotiate(w, req, user)
 }
 ```
 
