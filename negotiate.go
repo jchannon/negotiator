@@ -5,7 +5,7 @@ import "net/http"
 var processors = []ResponseProcessor{&JSONProcessor{}, &XMLProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
-func New(responseProcessors []ResponseProcessor) {
+func New(responseProcessors ...ResponseProcessor) {
 	processors = append(processors, responseProcessors...)
 }
 

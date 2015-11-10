@@ -9,11 +9,11 @@ import (
 type JSONProcessor struct {
 }
 
-func (JSONProcessor) CanProcess(mediaRange string) bool {
+func (*JSONProcessor) CanProcess(mediaRange string) bool {
 	return strings.HasSuffix(mediaRange, "json")
 }
 
-func (JSONProcessor) Process(w http.ResponseWriter, model interface{}) {
+func (*JSONProcessor) Process(w http.ResponseWriter, model interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 
 	js, err := json.Marshal(model)
