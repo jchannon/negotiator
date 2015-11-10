@@ -4,6 +4,7 @@ This is a libary that handles content negotiation in web applications written in
 
 ## Usage
 
+### Simple
 To return JSON/XML out of the box simple put this in your route handler:
 ```
 func getUser(w http.ResponseWriter, req *http.Request) {
@@ -11,6 +12,7 @@ func getUser(w http.ResponseWriter, req *http.Request) {
     negotiator.Negotiate(w, req, user)
 }
 ```
+### Custom Processors
 
 To add your own negotiator for example you want to write a PDF with your model call do the following:
 
