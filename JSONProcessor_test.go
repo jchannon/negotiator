@@ -8,7 +8,7 @@ import (
 
 func TestShouldProcessJSONAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
-		acceptheader string // input
+		acceptheader string
 	}{
 		{"application/json"},
 		{"application/json-"},
@@ -16,7 +16,7 @@ func TestShouldProcessJSONAcceptHeader(t *testing.T) {
 		{"+json"},
 	}
 
-	jsonProcessor := &JSONProcessor{}
+	jsonProcessor := &jsonProcessor{}
 
 	for _, tt := range acceptTests {
 		result := jsonProcessor.CanProcess(tt.acceptheader)

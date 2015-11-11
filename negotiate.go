@@ -2,7 +2,7 @@ package negotiator
 
 import "net/http"
 
-var processors = []ResponseProcessor{&JSONProcessor{}, &XMLProcessor{}}
+var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
 func New(responseProcessors ...*ResponseProcessor) {
