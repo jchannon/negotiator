@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+//I think this will be obsolete when we add a library to handle the the Accept header better as that will be unit tested
 func TestShouldProcessJSONAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
@@ -62,7 +63,6 @@ func TestShouldSet500StatusCodeOnError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &User{
-
 		"Joe Bloggs",
 	}
 
