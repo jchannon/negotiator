@@ -9,11 +9,11 @@ import (
 type XMLProcessor struct {
 }
 
-func (XMLProcessor) CanProcess(mediaRange string) bool {
+func (*XMLProcessor) CanProcess(mediaRange string) bool {
 	return strings.HasSuffix(mediaRange, "xml")
 }
 
-func (XMLProcessor) Process(w http.ResponseWriter, model interface{}) {
+func (*XMLProcessor) Process(w http.ResponseWriter, model interface{}) {
 	x, err := xml.MarshalIndent(model, "", "  ")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
