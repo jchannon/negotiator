@@ -6,11 +6,9 @@ var processors = []ResponseProcessor{&JSONProcessor{}, &XMLProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
 func New(responseProcessors ...*ResponseProcessor) {
-	processors = append(processors)
 	for _, proc := range responseProcessors {
 		processors = append(processors, *proc)
 	}
-
 }
 
 //Negotiate your model based on HTTP Accept header
