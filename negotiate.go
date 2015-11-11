@@ -1,3 +1,12 @@
+//Package negotiator is a libary that handles content negotiation in web applications written in Go.
+//
+//For more infomation visit http://github.com/jchannon/negotiator
+//
+//	func getUser(w http.ResponseWriter, req *http.Request) {
+//	    user := &User{"Joe","Bloggs"}
+//	    negotiator.Negotiate(w, req, user)
+//	}
+//
 package negotiator
 
 import "net/http"
