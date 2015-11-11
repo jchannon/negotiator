@@ -10,7 +10,10 @@ type JSONProcessor struct {
 }
 
 func (*JSONProcessor) CanProcess(mediaRange string) bool {
-	return strings.HasSuffix(mediaRange, "json")
+	return strings.EqualFold(mediaRange, "application/json") ||
+		strings.HasPrefix(mediaRange, "application/json-") ||
+		strings.EqualFold(mediaRange, "text/json") ||
+		strings.HasSuffix(mediaRange, "+json")
 }
 
 func (*JSONProcessor) Process(w http.ResponseWriter, model interface{}) {
