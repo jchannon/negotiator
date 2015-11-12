@@ -14,17 +14,16 @@ import "net/http"
 var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
-func New(responseProcessors ...*ResponseProcessor) {
-	for _, proc := range responseProcessors {
-		processors = append(processors, *proc)
-	}
+func New(responseProcessors ...ResponseProcessor) {
+	//ResponseProcessor is an interface and you shouldnt declare a pointer to an interface *ResponseProcessor
+	processors = append(responseProcessors, processors...)
 }
 
 //Negotiate your model based on HTTP Accept header
 func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
 
 	accept := new(Accept)
-	//TODO:test should not be case sensitive
+
 	accept.Header = req.Header.Get("Accept")
 
 	for _, mr := range accept.ParseMediaRanges() {
