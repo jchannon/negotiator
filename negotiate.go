@@ -27,7 +27,7 @@ func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
 	//TODO:test should not be case sensitive
 	accept.Header = req.Header.Get("Accept")
 
-	for _, mr := range accept.MediaRanges() {
+	for _, mr := range accept.ParseMediaRanges() {
 		for _, processor := range processors {
 			if processor.CanProcess(mr.Value) {
 				processor.Process(w, model)
