@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-type XMLProcessor struct {
+type xmlProcessor struct {
 }
 
-func (*XMLProcessor) CanProcess(mediaRange string) bool {
+func (*xmlProcessor) CanProcess(mediaRange string) bool {
 	return strings.HasSuffix(mediaRange, "xml")
 }
 
-func (*XMLProcessor) Process(w http.ResponseWriter, model interface{}) {
+func (*xmlProcessor) Process(w http.ResponseWriter, model interface{}) {
 	x, err := xml.MarshalIndent(model, "", "  ")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
