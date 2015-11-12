@@ -15,7 +15,6 @@ func TestShouldProcessJSONAcceptHeader(t *testing.T) {
 	}{
 		{"application/json"},
 		{"application/json-"},
-		{"text/json"},
 		{"+json"},
 	}
 
