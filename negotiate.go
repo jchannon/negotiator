@@ -1,8 +1,17 @@
+//Package negotiator is a libary that handles content negotiation in web applications written in Go.
+//
+//For more infomation visit http://github.com/jchannon/negotiator
+//
+//	func getUser(w http.ResponseWriter, req *http.Request) {
+//	    user := &User{"Joe","Bloggs"}
+//	    negotiator.Negotiate(w, req, user)
+//	}
+//
 package negotiator
 
 import "net/http"
 
-var processors = []ResponseProcessor{&JSONProcessor{}, &XMLProcessor{}}
+var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
 func New(responseProcessors ...*ResponseProcessor) {
