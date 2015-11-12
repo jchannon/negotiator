@@ -14,9 +14,10 @@ import "net/http"
 var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
-func New(responseProcessors ...*ResponseProcessor) {
+func New(responseProcessors ...ResponseProcessor) {
+	//ResponseProcessor is an interface and you shouldnt declare a pointer to an interface *ResponseProcessor
 	for _, proc := range responseProcessors {
-		processors = append(processors, *proc)
+		processors = append(processors, proc)
 	}
 }
 
