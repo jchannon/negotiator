@@ -7,27 +7,27 @@ import (
 )
 
 // Accept is an http accept
-type Accept struct {
+type accept struct {
 	Header string
 }
 
 // MediaRanges returns prioritized media ranges
-func (accept *Accept) ParseMediaRanges() []WeightedValue {
-	var retVals []WeightedValue
+func (accept *accept) ParseMediaRanges() []weightedValue {
+	var retVals []weightedValue
 	mrs := strings.Split(accept.Header, ",")
 
 	for _, mr := range mrs {
 		mrAndAcceptParam := strings.Split(mr, ";")
 		//if no quality assigned then give 1.0
 		if len(mrAndAcceptParam) == 1 {
-			wv := new(WeightedValue)
+			wv := new(weightedValue)
 			wv.Value = strings.TrimSpace(mrAndAcceptParam[0])
 			wv.Weight = 1.0
 			retVals = append(retVals, *wv)
 			continue
 		}
 
-		wv := new(WeightedValue)
+		wv := new(weightedValue)
 		wv.Value = strings.TrimSpace(mrAndAcceptParam[0])
 
 		var weight float64
@@ -54,7 +54,7 @@ func (accept *Accept) ParseMediaRanges() []WeightedValue {
 	//Accept field value, then the server SHOULD send a 406 (not acceptable)
 	//response.
 
-	sort.Sort(ByWeight(retVals))
+	sort.Sort(byWeight(retVals))
 
 	return retVals
 }
