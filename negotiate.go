@@ -1,6 +1,6 @@
-//Package negotiator is a libary that handles content negotiation in web applications written in Go.
+//Package negotiator is a library that handles content negotiation in web applications written in Go.
 //
-//For more infomation visit http://github.com/jchannon/negotiator
+//For more information visit http://github.com/jchannon/negotiator
 //
 //	func getUser(w http.ResponseWriter, req *http.Request) {
 //	    user := &User{"Joe","Bloggs"}
@@ -15,14 +15,14 @@ var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 
 //New sets up response processors. By default XML and JSON are created
 func New(responseProcessors ...ResponseProcessor) {
-	//ResponseProcessor is an interface and you shouldnt declare a pointer to an interface *ResponseProcessor
+	//ResponseProcessor is an interface and you shouldn't declare a pointer to an interface *ResponseProcessor
 	processors = append(responseProcessors, processors...)
 }
 
 //Negotiate your model based on HTTP Accept header
 func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
 
-	accept := new(Accept)
+	accept := new(accept)
 
 	accept.Header = req.Header.Get("Accept")
 

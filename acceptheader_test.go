@@ -7,7 +7,7 @@ import (
 )
 
 func TestParseMediaRanges_parses_single(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "application/json"
 	mr := a.ParseMediaRanges()
 
@@ -17,7 +17,7 @@ func TestParseMediaRanges_parses_single(t *testing.T) {
 }
 
 func TestParseMediaRanges_defaults_quality_if_not_explicit(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "text/plain"
 	mr := a.ParseMediaRanges()
 	assert.Equal(t, 1, len(mr))
@@ -25,7 +25,7 @@ func TestParseMediaRanges_defaults_quality_if_not_explicit(t *testing.T) {
 }
 
 func TestParseMediaRanges_should_parse_quality(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "application/json;q=0.9"
 	mr := a.ParseMediaRanges()
 
@@ -35,7 +35,7 @@ func TestParseMediaRanges_should_parse_quality(t *testing.T) {
 }
 
 func TestParseMediaRanges_should_parse_multi_qualities(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "application/xml;q=1, application/json;q=0.9"
 	mr := a.ParseMediaRanges()
 
@@ -49,7 +49,7 @@ func TestParseMediaRanges_should_parse_multi_qualities(t *testing.T) {
 }
 
 func TestParseMediaRanges_reorders_by_quality_decending(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "application/json;q=0.9, application/xml"
 	mr := a.ParseMediaRanges()
 
@@ -63,7 +63,7 @@ func TestParseMediaRanges_reorders_by_quality_decending(t *testing.T) {
 }
 
 func TestMediaRanges_should_ignore_invalid_quality(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "text/html;q=blah"
 	mr := a.ParseMediaRanges()
 
@@ -73,7 +73,7 @@ func TestMediaRanges_should_ignore_invalid_quality(t *testing.T) {
 }
 
 func TestMediaRanges_should_not_remove_accept_extension(t *testing.T) {
-	a := new(Accept)
+	a := new(accept)
 	a.Header = "text/html;q=0.5;a=1;b=2"
 	mr := a.ParseMediaRanges()
 	assert.Equal(t, 1, len(mr))
