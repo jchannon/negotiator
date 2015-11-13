@@ -9,18 +9,31 @@
 //
 package negotiator
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+	"reflect"
+)
 
-var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
+//Negotiator is responsible for content negotiation
+type Negotiator struct{ processors []ResponseProcessor }
 
 //New sets up response processors. By default XML and JSON are created
-func New(responseProcessors ...ResponseProcessor) {
-	//ResponseProcessor is an interface and you shouldn't declare a pointer to an interface *ResponseProcessor
-	processors = append(responseProcessors, processors...)
+func New() *Negotiator {
+	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
+	return &Negotiator{
+		processors,
+	}
+}
+
+//AddResponseProcessor allows you to add custom ResponseProcessors for your own content negotiation eg/PDF
+func (n *Negotiator) AddResponseProcessor(responseProcessors ...ResponseProcessor) {
+	//ResponseProcessor is an interface and you shouldnt declare a pointer to an interface *ResponseProcessor
+	n.processors = append(responseProcessors, n.processors...)
 }
 
 //Negotiate your model based on HTTP Accept header
-func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
+func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
 
 	accept := new(accept)
 

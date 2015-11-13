@@ -2,31 +2,40 @@ package negotiator
 
 import (
 	"net/http"
-	"reflect"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldAddCustomResponseProcessors(t *testing.T) {
+// func TestShouldAddCustomResponseProcessors(t *testing.T) {
+//
+// 	var fakeResponseProcessor = &fakeProcessor{}
+//
+// 	New(fakeResponseProcessor)
+//
+// 	assert.Equal(t, 3, len(processors))
+// }
+//
+// func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
+//
+// 	var fakeResponseProcessor = &fakeProcessor{}
+//
+// 	New(fakeResponseProcessor)
+//
+// 	firstProcessor := processors[0]
+// 	processorName := reflect.TypeOf(firstProcessor).String()
+//
+// 	assert.Equal(t, "*negotiator.fakeProcessor", processorName)
+// }
 
-	var fakeResponseProcessor = &fakeProcessor{}
+func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/", nil)
+	recorder := httptest.NewRecorder()
 
-	New(fakeResponseProcessor)
+	Negotiate(recorder, req, nil)
 
-	assert.Equal(t, 3, len(processors))
-}
-
-func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
-
-	var fakeResponseProcessor = &fakeProcessor{}
-
-	New(fakeResponseProcessor)
-
-	firstProcessor := processors[0]
-	processorName := reflect.TypeOf(firstProcessor).String()
-
-	assert.Equal(t, "*negotiator.fakeProcessor", processorName)
+	assert.Equal(t, 406, recorder.Code)
 }
 
 type fakeProcessor struct {
