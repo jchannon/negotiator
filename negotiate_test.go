@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,13 +51,27 @@ func TestShouldReturn406IfNoAcceptHeaderWithoutCustomerResponseProcessor(t *test
 
 }
 
+func TestShouldNegotiateAndWriteToResponseBody(t *testing.T) {
+	var fakeResponseProcessor = &fakeProcessor{}
+	negotiator := New(fakeResponseProcessor)
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	req.Header.Add("Accept", "application/negotiatortesting")
+	recorder := httptest.NewRecorder()
+
+	negotiator.Negotiate(recorder, req, nil)
+
+	assert.Equal(t, "boo ya!", recorder.Body.String())
+
+}
+
 type fakeProcessor struct {
 }
 
 func (*fakeProcessor) CanProcess(mediaRange string) bool {
-	return true
+	return strings.EqualFold(mediaRange, "application/negotiatortesting")
 }
 
 func (*fakeProcessor) Process(w http.ResponseWriter, model interface{}) {
-
+	w.Write([]byte("boo ya!"))
 }
