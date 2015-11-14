@@ -9,11 +9,7 @@
 //
 package negotiator
 
-import (
-	"fmt"
-	"net/http"
-	"reflect"
-)
+import "net/http"
 
 //Negotiator is responsible for content negotiation
 type Negotiator struct{ processors []ResponseProcessor }
@@ -34,8 +30,17 @@ func (n *Negotiator) AddResponseProcessor(responseProcessors ...ResponseProcesso
 
 //Negotiate your model based on HTTP Accept header
 func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
+	negotiateHeader(n.processors, w, req, model)
+}
 
-	accept := new(accept)
+//Negotiate your model based on HTTP Accept header
+func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
+	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
+	negotiateHeader(processors, w, req, model)
+}
+
+func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, model interface{}) {
+	accept := new(Accept)
 
 	accept.Header = req.Header.Get("Accept")
 
