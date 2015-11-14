@@ -11,20 +11,16 @@ import (
 
 func TestShouldAddCustomResponseProcessors(t *testing.T) {
 
-	negotiator := New()
 	var fakeResponseProcessor = &fakeProcessor{}
-
-	negotiator.AddResponseProcessor(fakeResponseProcessor)
+	negotiator := New(fakeResponseProcessor)
 
 	assert.Equal(t, 3, len(negotiator.processors))
 }
 
 func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
 
-	negotiator := New()
 	var fakeResponseProcessor = &fakeProcessor{}
-
-	negotiator.AddResponseProcessor(fakeResponseProcessor)
+	negotiator := New(fakeResponseProcessor)
 
 	firstProcessor := negotiator.processors[0]
 	processorName := reflect.TypeOf(firstProcessor).String()
@@ -33,10 +29,12 @@ func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
 }
 
 func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
+	var fakeResponseProcessor = &fakeProcessor{}
+	negotiator := New(fakeResponseProcessor)
+
 	req, _ := http.NewRequest("GET", "/", nil)
 	recorder := httptest.NewRecorder()
 
-	negotiator := New()
 	negotiator.Negotiate(recorder, req, nil)
 
 	assert.Equal(t, 406, recorder.Code)
