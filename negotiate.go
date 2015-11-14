@@ -23,12 +23,6 @@ func New(responseProcessors ...ResponseProcessor) *Negotiator {
 	}
 }
 
-//AddResponseProcessor allows you to add custom ResponseProcessors for your own content negotiation eg/PDF
-// func (n *Negotiator) AddResponseProcessor(responseProcessors ...ResponseProcessor) {
-// 	//ResponseProcessor is an interface and you shouldnt declare a pointer to an interface *ResponseProcessor
-// 	n.processors = append(responseProcessors, n.processors...)
-// }
-
 //Negotiate your model based on HTTP Accept header
 func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
 	negotiateHeader(n.processors, w, req, model)
