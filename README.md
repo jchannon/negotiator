@@ -14,7 +14,7 @@ func getUser(w http.ResponseWriter, req *http.Request) {
 ```
 ### Custom 
 
-To add your own negotiator for example you want to write a PDF with your model call do the following:
+To add your own negotiator, for example you want to write a PDF with your model, do the following:
 
 
 1) Create a type that conforms to the [ResponseProcessor](https://github.com/jchannon/negotiator/blob/master/ResponseProcessor.go) interface
