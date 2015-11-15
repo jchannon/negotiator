@@ -38,7 +38,7 @@ func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
 
 	negotiator.Negotiate(recorder, req, nil)
 
-	assert.Equal(t, 406, recorder.Code)
+	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
 }
 
 func TestShouldReturn406IfNoAcceptHeaderWithoutCustomerResponseProcessor(t *testing.T) {
@@ -47,7 +47,7 @@ func TestShouldReturn406IfNoAcceptHeaderWithoutCustomerResponseProcessor(t *test
 
 	Negotiate(recorder, req, nil)
 
-	assert.Equal(t, 406, recorder.Code)
+	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
 
 }
 
