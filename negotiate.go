@@ -11,10 +11,10 @@ package negotiator
 
 import "net/http"
 
-//Negotiator is responsible for content negotiation
+//Negotiator is responsible for content negotiation when using custom response processors
 type Negotiator struct{ processors []ResponseProcessor }
 
-//New sets up response processors. By default XML and JSON are created
+//New allows users to pass custom response processors. By default XML and JSON are already created
 func New(responseProcessors ...ResponseProcessor) *Negotiator {
 	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 	processors = append(responseProcessors, processors...)
@@ -28,7 +28,7 @@ func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model i
 	negotiateHeader(n.processors, w, req, model)
 }
 
-//Negotiate your model based on HTTP Accept header
+//Negotiate your model based on HTTP Accept header. By default XML and JSON are handled
 func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
 	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 	negotiateHeader(processors, w, req, model)
