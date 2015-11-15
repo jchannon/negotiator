@@ -11,22 +11,38 @@ package negotiator
 
 import "net/http"
 
-var processors = []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
+//Negotiator is responsible for content negotiation
+type Negotiator struct{ processors []ResponseProcessor }
 
 //New sets up response processors. By default XML and JSON are created
-func New(responseProcessors ...ResponseProcessor) {
-	//ResponseProcessor is an interface and you shouldn't declare a pointer to an interface *ResponseProcessor
+func New(responseProcessors ...ResponseProcessor) *Negotiator {
+	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
 	processors = append(responseProcessors, processors...)
+	return &Negotiator{
+		processors,
+	}
+}
+
+//Negotiate your model based on HTTP Accept header
+func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
+	negotiateHeader(n.processors, w, req, model)
 }
 
 //Negotiate your model based on HTTP Accept header
 func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
+	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
+	negotiateHeader(processors, w, req, model)
+}
 
+func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, model interface{}) {
 	accept := new(accept)
 
 	accept.Header = req.Header.Get("Accept")
 
 	for _, mr := range accept.ParseMediaRanges() {
+		if len(mr.Value) == 0 {
+			continue
+		}
 		for _, processor := range processors {
 			if processor.CanProcess(mr.Value) {
 				processor.Process(w, model)
