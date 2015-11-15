@@ -19,4 +19,4 @@ To add your own negotiator for example you want to write a PDF with your model c
 
 1) Create a type that conforms to the [ResponseProcessor](https://github.com/jchannon/negotiator/blob/master/ResponseProcessor.go) interface
 
-2) Call `negotiator.New()` and pass in a `[]ResponseProcessor` containing your type. When your request handler calls `negotiator.Negotiate(w,req,model)` it will render a PDF if your Accept header defined it wanted a PDF response.
+2) Call `negotiator.New(responseProcessors ...ResponseProcessor)` and pass in a your custom processor. When your request handler calls `negotiator.Negotiate(w,req,model)` it will render a PDF if your Accept header defined it wanted a PDF response.
