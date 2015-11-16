@@ -1,4 +1,4 @@
-# Negotiator
+# Negotiator [![GoDoc](https://godoc.org/github.com/jchannon/negotiator?status.png)](http://godoc.org/github.com/jchannon/negotiator)
 
 This is a libary that handles content negotiation in web applications written in Go.
 
