@@ -65,6 +65,19 @@ func TestShouldNegotiateAndWriteToResponseBody(t *testing.T) {
 
 }
 
+func TestShouldNegotiateADefaultProcessor(t *testing.T) {
+	var fakeResponseProcessor = &fakeProcessor{}
+	negotiator := New(fakeResponseProcessor)
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	req.Header.Add("Accept", "*/*")
+	recorder := httptest.NewRecorder()
+
+	negotiator.Negotiate(recorder, req, nil)
+
+	assert.Equal(t, "boo ya!", recorder.Body.String())
+}
+
 type fakeProcessor struct {
 }
 
