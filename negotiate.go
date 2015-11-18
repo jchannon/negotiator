@@ -9,7 +9,10 @@
 //
 package negotiator
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 //Negotiator is responsible for content negotiation when using custom response processors
 type Negotiator struct{ processors []ResponseProcessor }
@@ -43,6 +46,12 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 		if len(mr.Value) == 0 {
 			continue
 		}
+
+		if strings.EqualFold(mr.Value, "*/*") {
+			processors[0].Process(w, model)
+			return
+		}
+
 		for _, processor := range processors {
 			if processor.CanProcess(mr.Value) {
 				processor.Process(w, model)
