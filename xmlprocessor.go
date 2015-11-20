@@ -13,10 +13,10 @@ func (*xmlProcessor) CanProcess(mediaRange string) bool {
 	return strings.HasSuffix(mediaRange, "xml")
 }
 
-func (*xmlProcessor) Process(w http.ResponseWriter, model interface{}) {
+func (*xmlProcessor) Process(w http.ResponseWriter, model interface{}, errorHandler func(w http.ResponseWriter, err error)) {
 	x, err := xml.MarshalIndent(model, "", "  ")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, err)
 		return
 	}
 
