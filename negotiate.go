@@ -27,17 +27,17 @@ func New(responseProcessors ...ResponseProcessor) *Negotiator {
 }
 
 //Negotiate your model based on HTTP Accept header
-func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
-	negotiateHeader(n.processors, w, req, model)
+func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}, errorHandler func(w http.ResponseWriter, err error)) {
+	negotiateHeader(n.processors, w, req, model, errorHandler)
 }
 
 //Negotiate your model based on HTTP Accept header. By default XML and JSON are handled
-func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) {
+func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}, errorHandler func(w http.ResponseWriter, err error)) {
 	processors := []ResponseProcessor{&jsonProcessor{}, &xmlProcessor{}}
-	negotiateHeader(processors, w, req, model)
+	negotiateHeader(processors, w, req, model, errorHandler)
 }
 
-func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, model interface{}) {
+func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, model interface{}, errorHandler func(w http.ResponseWriter, err error)) {
 	accept := new(accept)
 
 	accept.Header = req.Header.Get("Accept")
@@ -48,13 +48,13 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 		}
 
 		if strings.EqualFold(mr.Value, "*/*") {
-			processors[0].Process(w, model)
+			processors[0].Process(w, model, errorHandler)
 			return
 		}
 
 		for _, processor := range processors {
 			if processor.CanProcess(mr.Value) {
-				processor.Process(w, model)
+				processor.Process(w, model, errorHandler)
 				return
 			}
 		}

@@ -7,6 +7,7 @@ import (
 	"github.com/jchannon/negotiator/demo/responseprocessors"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
+	"github.com/jchannon/negotiator/demo/errorhandlers"
 )
 
 func main() {
@@ -20,26 +21,26 @@ func main() {
 
 func homeHandler(w http.ResponseWriter, req *http.Request) {
 	user := &user{"Joe", "Bloggs"}
-	negotiator.Negotiate(w, req, user)
+	negotiator.Negotiate(w,req,user,errorhandlers.GlobalErrorHandler)
 }
 
 func customHandler(w http.ResponseWriter, req *http.Request) {
 	user := &user{"Joe", "Bloggs"}
 	//Creating the negotiator could be done for only required handlers or use middleware for all
 	textplainNegotiator := negotiator.New(&responseprocessors.PlainTextResponseProcessor{})
-	textplainNegotiator.Negotiate(w, req, user)
+	textplainNegotiator.Negotiate(w, req, user, errorhandlers.GlobalErrorHandler)
 }
 
 func multiNegotiatorHandler(c web.C, w http.ResponseWriter, req *http.Request) {
 	user := &user{"Joe", "Bloggs"}
 	mynegotiator := c.Env["negotiator"].(*negotiator.Negotiator)
-	mynegotiator.Negotiate(w, req, user)
+	mynegotiator.Negotiate(w, req, user,errorhandlers.GlobalErrorHandler)
 }
 
 func multiNegotiatorHandlerAgain(c web.C, w http.ResponseWriter, req *http.Request) {
 	user := &user{"John", "Doe"}
 	mynegotiator := c.Env["negotiator"].(*negotiator.Negotiator)
-	mynegotiator.Negotiate(w, req, user)
+	mynegotiator.Negotiate(w, req, user,errorhandlers.GlobalErrorHandler)
 }
 
 type user struct {
