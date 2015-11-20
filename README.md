@@ -1,5 +1,4 @@
-# Negotiator [![GoDoc](https://godoc.org/github.com/jchannon/negotiator?status.png)](http://godoc.org/github.com/jchannon/negotiator)
-[![Build Status](https://travis-ci.org/jchannon/negotiator.svg?branch=master)](https://travis-ci.org/jchannon/negotiator)
+# Negotiator [![GoDoc](https://godoc.org/github.com/jchannon/negotiator?status.png)](http://godoc.org/github.com/jchannon/negotiator) [![Build Status](https://travis-ci.org/jchannon/negotiator.svg?branch=master)](https://travis-ci.org/jchannon/negotiator)
 This is a libary that handles content negotiation in web applications written in Go.
 
 ## Usage
