@@ -2,7 +2,7 @@ package errorhandlers
 
 import "net/http"
 
-func GlobalErrorHandler(w http.ResponseWriter, err error ) {
-		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+//GlobalErrorHandler is a error handler example to show how to pass a function to negotiator
+func GlobalErrorHandler(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

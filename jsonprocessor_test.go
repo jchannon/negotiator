@@ -2,6 +2,7 @@ package negotiator
 
 import (
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -36,7 +37,7 @@ func TestShouldSetContentTypeHeader(t *testing.T) {
 
 	jsonProcessor := &jsonProcessor{}
 
-	jsonProcessor.Process(recorder, model)
+	jsonProcessor.Process(recorder, model, nil)
 
 	assert.Equal(t, "application/json", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -52,12 +53,12 @@ func TestShouldSetResponseBody(t *testing.T) {
 
 	jsonProcessor := &jsonProcessor{}
 
-	jsonProcessor.Process(recorder, model)
+	jsonProcessor.Process(recorder, model, nil)
 
 	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}", recorder.Body.String())
 }
 
-func TestShouldSet500StatusCodeOnError(t *testing.T) {
+func TestShouldCallErrorHandlerOnJsonError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &User{
@@ -66,9 +67,10 @@ func TestShouldSet500StatusCodeOnError(t *testing.T) {
 
 	jsonProcessor := &jsonProcessor{}
 
-	jsonProcessor.Process(recorder, model)
+	jsonProcessor.Process(recorder, model, jsontestErrorHandler)
 
 	assert.Equal(t, 500, recorder.Code)
+	assert.Equal(t, "json: error calling MarshalJSON for type *negotiator.User: oops", recorder.Body.String())
 }
 
 type User struct {
@@ -77,4 +79,9 @@ type User struct {
 
 func (u *User) MarshalJSON() ([]byte, error) {
 	return nil, errors.New("oops")
+}
+
+func jsontestErrorHandler(w http.ResponseWriter, err error) {
+	w.WriteHeader(500)
+	w.Write([]byte(err.Error()))
 }

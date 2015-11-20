@@ -3,6 +3,7 @@ package negotiator
 import (
 	"encoding/xml"
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -33,7 +34,7 @@ func TestShouldSetXmlContentTypeHeader(t *testing.T) {
 
 	xmlProcessor := &xmlProcessor{}
 
-	xmlProcessor.Process(recorder, model)
+	xmlProcessor.Process(recorder, model, nil)
 
 	assert.Equal(t, "application/xml", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -47,12 +48,12 @@ func TestShouldSetXmlResponseBody(t *testing.T) {
 
 	xmlProcessor := &xmlProcessor{}
 
-	xmlProcessor.Process(recorder, model)
+	xmlProcessor.Process(recorder, model, nil)
 
 	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>", recorder.Body.String())
 }
 
-func TestShouldSet500StatusCodeOnXmlError(t *testing.T) {
+func TestShouldCallErrorHandlerOnXmlError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &XMLUser{
@@ -61,7 +62,7 @@ func TestShouldSet500StatusCodeOnXmlError(t *testing.T) {
 
 	xmlProcessor := &xmlProcessor{}
 
-	xmlProcessor.Process(recorder, model)
+	xmlProcessor.Process(recorder, model, xmltestErrorHandler)
 
 	assert.Equal(t, 500, recorder.Code)
 }
@@ -76,4 +77,9 @@ type XMLUser struct {
 
 func (u *XMLUser) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return errors.New("oops")
+}
+
+func xmltestErrorHandler(w http.ResponseWriter, err error) {
+	w.WriteHeader(500)
+	w.Write([]byte(err.Error()))
 }
