@@ -1,5 +1,5 @@
 # Negotiator [![GoDoc](https://godoc.org/github.com/jchannon/negotiator?status.png)](http://godoc.org/github.com/jchannon/negotiator)
-
+[![Build Status](https://travis-ci.org/jchannon/negotiator.svg?branch=master)](https://travis-ci.org/jchannon/negotiator)
 This is a libary that handles content negotiation in web applications written in Go.
 
 ## Usage
@@ -12,7 +12,7 @@ func getUser(w http.ResponseWriter, req *http.Request) {
     negotiator.Negotiate(w, req, user)
 }
 ```
-### Custom 
+### Custom
 
 To add your own negotiator, for example you want to write a PDF with your model, do the following:
 
