@@ -36,7 +36,7 @@ func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil, nil)
+	negotiator.Negotiate(recorder, req, nil)
 
 	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
 }
@@ -59,7 +59,7 @@ func TestShouldNegotiateAndWriteToResponseBody(t *testing.T) {
 	req.Header.Add("Accept", "application/negotiatortesting")
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil, nil)
+	negotiator.Negotiate(recorder, req, nil)
 
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 
@@ -73,7 +73,7 @@ func TestShouldNegotiateADefaultProcessor(t *testing.T) {
 	req.Header.Add("Accept", "*/*")
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil, nil)
+	negotiator.Negotiate(recorder, req, nil)
 
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 }

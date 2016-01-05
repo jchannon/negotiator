@@ -21,26 +21,27 @@ func main() {
 
 func homeHandler(w http.ResponseWriter, req *http.Request) {
 	user := &user{"Joe", "Bloggs"}
-	negotiator.Negotiate(w,req,user,errorhandlers.GlobalErrorHandler)
+	negotiator.Negotiate(w, req, user, errorhandlers.GlobalErrorHandler)
 }
 
 func customHandler(w http.ResponseWriter, req *http.Request) {
 	user := &user{"Joe", "Bloggs"}
 	//Creating the negotiator could be done for only required handlers or use middleware for all
 	textplainNegotiator := negotiator.New(&responseprocessors.PlainTextResponseProcessor{})
-	textplainNegotiator.Negotiate(w, req, user, errorhandlers.GlobalErrorHandler)
+	textplainNegotiator.ErrorHandler = errorhandlers.GlobalErrorHandler
+	textplainNegotiator.Negotiate(w, req, user)
 }
 
 func multiNegotiatorHandler(c web.C, w http.ResponseWriter, req *http.Request) {
 	user := &user{"Joe", "Bloggs"}
 	mynegotiator := c.Env["negotiator"].(*negotiator.Negotiator)
-	mynegotiator.Negotiate(w, req, user,errorhandlers.GlobalErrorHandler)
+	mynegotiator.Negotiate(w, req, user)
 }
 
 func multiNegotiatorHandlerAgain(c web.C, w http.ResponseWriter, req *http.Request) {
 	user := &user{"John", "Doe"}
 	mynegotiator := c.Env["negotiator"].(*negotiator.Negotiator)
-	mynegotiator.Negotiate(w, req, user,errorhandlers.GlobalErrorHandler)
+	mynegotiator.Negotiate(w, req, user)
 }
 
 type user struct {
@@ -50,7 +51,9 @@ type user struct {
 
 func negotiatormw(c *web.C, h http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		c.Env["negotiator"] = negotiator.New(&responseprocessors.PlainTextResponseProcessor{})
+		n := negotiator.New(&responseprocessors.PlainTextResponseProcessor{})
+		n.ErrorHandler = errorhandlers.GlobalErrorHandler
+		c.Env["negotiator"] = n
 
 		h.ServeHTTP(w, r)
 	}
