@@ -34,7 +34,7 @@ func TestShouldSetXmlContentTypeHeader(t *testing.T) {
 
 	xmlProcessor := &xmlProcessor{}
 
-	xmlProcessor.Process(recorder, model, nil)
+	xmlProcessor.Process(recorder, model)
 
 	assert.Equal(t, "application/xml", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -48,12 +48,12 @@ func TestShouldSetXmlResponseBody(t *testing.T) {
 
 	xmlProcessor := &xmlProcessor{}
 
-	xmlProcessor.Process(recorder, model, nil)
+	xmlProcessor.Process(recorder, model)
 
 	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>", recorder.Body.String())
 }
 
-func TestShouldCallErrorHandlerOnXmlError(t *testing.T) {
+func TestShouldReturnErrorOnXmlError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &XMLUser{
@@ -62,9 +62,9 @@ func TestShouldCallErrorHandlerOnXmlError(t *testing.T) {
 
 	xmlProcessor := &xmlProcessor{}
 
-	xmlProcessor.Process(recorder, model, xmltestErrorHandler)
+	err := xmlProcessor.Process(recorder, model)
 
-	assert.Equal(t, 500, recorder.Code)
+	assert.Error(t, err)
 }
 
 type ValidXMLUser struct {
