@@ -8,7 +8,9 @@ To return JSON/XML out of the box simple put this in your route handler:
 ```
 func getUser(w http.ResponseWriter, req *http.Request) {
     user := &User{"Joe","Bloggs"}
-    negotiator.Negotiate(w, req, user, GlobalErrorHandler)
+    if err := negotiator.Negotiate(w, req, user); err != nil {
+      http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
 }
 ```
 ### Custom
