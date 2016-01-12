@@ -15,15 +15,15 @@ func (*jsonProcessor) CanProcess(mediaRange string) bool {
 		strings.HasSuffix(mediaRange, "+json")
 }
 
-func (*jsonProcessor) Process(w http.ResponseWriter, model interface{}, errorHandler func(w http.ResponseWriter, err error)) {
+func (*jsonProcessor) Process(w http.ResponseWriter, model interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 
 	js, err := json.Marshal(model)
 
 	if err != nil {
-		errorHandler(w, err)
-		return
+		return err
 	}
 
-	w.Write(js)
+	_, err = w.Write(js)
+	return err
 }

@@ -37,7 +37,7 @@ func TestShouldSetContentTypeHeader(t *testing.T) {
 
 	jsonProcessor := &jsonProcessor{}
 
-	jsonProcessor.Process(recorder, model, nil)
+	jsonProcessor.Process(recorder, model)
 
 	assert.Equal(t, "application/json", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -53,12 +53,12 @@ func TestShouldSetResponseBody(t *testing.T) {
 
 	jsonProcessor := &jsonProcessor{}
 
-	jsonProcessor.Process(recorder, model, nil)
+	jsonProcessor.Process(recorder, model)
 
 	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}", recorder.Body.String())
 }
 
-func TestShouldCallErrorHandlerOnJsonError(t *testing.T) {
+func TestShouldReturnErrorOnJsonError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &User{
@@ -67,10 +67,9 @@ func TestShouldCallErrorHandlerOnJsonError(t *testing.T) {
 
 	jsonProcessor := &jsonProcessor{}
 
-	jsonProcessor.Process(recorder, model, jsontestErrorHandler)
+	err := jsonProcessor.Process(recorder, model)
 
-	assert.Equal(t, 500, recorder.Code)
-	assert.Equal(t, "json: error calling MarshalJSON for type *negotiator.User: oops", recorder.Body.String())
+	assert.Error(t, err)
 }
 
 type User struct {

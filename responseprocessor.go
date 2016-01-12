@@ -5,5 +5,5 @@ import "net/http"
 //ResponseProcessor interface that creates contract for custom content negotiation
 type ResponseProcessor interface {
 	CanProcess(mediaRange string) bool
-	Process(w http.ResponseWriter, model interface{}, errorHandler func(w http.ResponseWriter, err error))
+	Process(w http.ResponseWriter, model interface{}) error
 }
