@@ -29,7 +29,7 @@ func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
 	assert.Equal(t, "*negotiator.fakeProcessor", processorName)
 }
 
-func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
+func TestShouldReturnDefaultProcessorIfNoAcceptHeader(t *testing.T) {
 	var fakeResponseProcessor = &fakeProcessor{}
 	negotiator := New(fakeResponseProcessor)
 
@@ -38,16 +38,16 @@ func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
 
 	negotiator.Negotiate(recorder, req, nil)
 
-	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
+	assert.Equal(t, "boo ya!", recorder.Body.String())
 }
 
-func TestShouldReturn406IfNoAcceptHeaderWithoutCustomResponseProcessor(t *testing.T) {
+func TestShouldReturnDefaultProcessorNoAcceptHeaderWithoutCustomResponseProcessor(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 	recorder := httptest.NewRecorder()
 
 	Negotiate(recorder, req, nil)
 
-	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 
 }
 
