@@ -13,7 +13,7 @@ import (
 func TestShouldAddCustomResponseProcessors(t *testing.T) {
 
 	var fakeResponseProcessor = &fakeProcessor{}
-	negotiator := New(fakeResponseProcessor)
+	negotiator := NewWithJsonAndXml(fakeResponseProcessor)
 
 	assert.Equal(t, 3, len(negotiator.processors))
 }

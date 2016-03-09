@@ -17,7 +17,7 @@ func TestShouldProcessXMLAcceptHeader(t *testing.T) {
 		{"application/xml"},
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	xmlProcessor := NewXML()
 
 	for _, tt := range acceptTests {
 		result := xmlProcessor.CanProcess(tt.acceptheader)
@@ -32,7 +32,7 @@ func TestShouldSetXmlContentTypeHeader(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	xmlProcessor := NewXML()
 
 	xmlProcessor.Process(recorder, model)
 
@@ -46,11 +46,25 @@ func TestShouldSetXmlResponseBody(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	xmlProcessor := NewXML()
 
 	xmlProcessor.Process(recorder, model)
 
-	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>", recorder.Body.String())
+	assert.Equal(t, "<ValidXMLUser><Name>Joe Bloggs</Name></ValidXMLUser>", recorder.Body.String())
+}
+
+func TestShouldSetXmlResponseBodyWithIndentation(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := &ValidXMLUser{
+		"Joe Bloggs",
+	}
+
+	xmlProcessor := NewXMLIndent2Spaces()
+
+	xmlProcessor.Process(recorder, model)
+
+	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>\n", recorder.Body.String())
 }
 
 func TestShouldReturnErrorOnXmlError(t *testing.T) {
@@ -60,7 +74,7 @@ func TestShouldReturnErrorOnXmlError(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	xmlProcessor := NewXMLIndent2Spaces()
 
 	err := xmlProcessor.Process(recorder, model)
 

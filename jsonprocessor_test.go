@@ -35,7 +35,7 @@ func TestShouldSetContentTypeHeader(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	jsonProcessor := NewJSON()
 
 	jsonProcessor.Process(recorder, model)
 
@@ -51,11 +51,27 @@ func TestShouldSetResponseBody(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	jsonProcessor := NewJSON()
 
 	jsonProcessor.Process(recorder, model)
 
-	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}", recorder.Body.String())
+	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}\n", recorder.Body.String())
+}
+
+func TestShouldSetResponseBodyWithIndentation(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := struct {
+		Name string
+	}{
+		"Joe Bloggs",
+	}
+
+	jsonProcessor := NewJSONIndent2Spaces()
+
+	jsonProcessor.Process(recorder, model)
+
+	assert.Equal(t, "{\n  \"Name\": \"Joe Bloggs\"\n}\n", recorder.Body.String())
 }
 
 func TestShouldReturnErrorOnJsonError(t *testing.T) {
@@ -65,7 +81,7 @@ func TestShouldReturnErrorOnJsonError(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	jsonProcessor := NewJSON()
 
 	err := jsonProcessor.Process(recorder, model)
 

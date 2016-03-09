@@ -7,6 +7,20 @@ import (
 )
 
 type jsonProcessor struct {
+	dense          bool
+	prefix, indent string
+}
+
+func NewJSON() ResponseProcessor {
+	return &jsonProcessor{true, "", ""}
+}
+
+func NewJSONIndent(prefix, index string) ResponseProcessor {
+	return &jsonProcessor{false, prefix, index}
+}
+
+func NewJSONIndent2Spaces() ResponseProcessor {
+	return NewJSONIndent("", "  ")
 }
 
 func (*jsonProcessor) CanProcess(mediaRange string) bool {
@@ -15,15 +29,20 @@ func (*jsonProcessor) CanProcess(mediaRange string) bool {
 		strings.HasSuffix(mediaRange, "+json")
 }
 
-func (*jsonProcessor) Process(w http.ResponseWriter, model interface{}) error {
+func (p *jsonProcessor) Process(w http.ResponseWriter, model interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
+	if p.dense {
+		return json.NewEncoder(w).Encode(model)
 
-	js, err := json.Marshal(model)
+	} else {
+		js, err := json.MarshalIndent(model, p.prefix, p.indent)
 
-	if err != nil {
+		if err != nil {
+			return err
+		}
+
+		_, err = w.Write(js)
+		_, err = w.Write([]byte{'\n'})
 		return err
 	}
-
-	_, err = w.Write(js)
-	return err
 }
