@@ -29,11 +29,24 @@ func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
 	assert.Equal(t, "*negotiator.fakeProcessor", processorName)
 }
 
-func TestShouldReturn406IfNoAcceptHeader(t *testing.T) {
+func TestShouldReturnDefaultProcessorIfNoAcceptHeader(t *testing.T) {
 	var fakeResponseProcessor = &fakeProcessor{}
 	negotiator := New(fakeResponseProcessor)
 
 	req, _ := http.NewRequest("GET", "/", nil)
+	recorder := httptest.NewRecorder()
+
+	negotiator.Negotiate(recorder, req, nil)
+
+	assert.Equal(t, "boo ya!", recorder.Body.String())
+}
+
+func TestShouldReturn406IfNoMatchingAcceptHeader(t *testing.T) {
+	var fakeResponseProcessor = &fakeProcessor{}
+	negotiator := New(fakeResponseProcessor)
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	req.Header.Add("Accept", "image/png")
 	recorder := httptest.NewRecorder()
 
 	negotiator.Negotiate(recorder, req, nil)
@@ -47,8 +60,7 @@ func TestShouldReturn406IfNoAcceptHeaderWithoutCustomResponseProcessor(t *testin
 
 	Negotiate(recorder, req, nil)
 
-	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
-
+	assert.Equal(t, http.StatusOK, recorder.Code)
 }
 
 func TestShouldNegotiateAndWriteToResponseBody(t *testing.T) {
@@ -62,7 +74,6 @@ func TestShouldNegotiateAndWriteToResponseBody(t *testing.T) {
 	negotiator.Negotiate(recorder, req, nil)
 
 	assert.Equal(t, "boo ya!", recorder.Body.String())
-
 }
 
 func TestShouldNegotiateADefaultProcessor(t *testing.T) {
@@ -78,8 +89,7 @@ func TestShouldNegotiateADefaultProcessor(t *testing.T) {
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 }
 
-type fakeProcessor struct {
-}
+type fakeProcessor struct{}
 
 func (*fakeProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "application/negotiatortesting")

@@ -2,6 +2,7 @@ package negotiator
 
 import (
 	"encoding/xml"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -38,8 +39,16 @@ func (p *xmlProcessor) Process(w http.ResponseWriter, model interface{}) error {
 			return err
 		}
 
-		_, err = w.Write(x)
-		_, err = w.Write([]byte{'\n'})
+		return writeWithNewline(w, x)
+	}
+}
+
+func writeWithNewline(w io.Writer, x []byte) error {
+	_, err := w.Write(x)
+	if err != nil {
 		return err
 	}
+
+	_, err = w.Write([]byte{'\n'})
+	return err
 }

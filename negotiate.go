@@ -45,6 +45,14 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 
 	accept.Header = req.Header.Get("Accept")
 
+	// http://tools.ietf.org/html/rfc7231#section-5.3.2
+	// rfc7231-sec5.3.2:
+	// A request without any Accept header field implies that the user agent
+	// will accept any media type in response.
+	if accept.Header == "" {
+		return processors[0].Process(w, model)
+	}
+
 	for _, mr := range accept.ParseMediaRanges() {
 		if len(mr.Value) == 0 {
 			continue

@@ -41,8 +41,6 @@ func (p *jsonProcessor) Process(w http.ResponseWriter, model interface{}) error 
 			return err
 		}
 
-		_, err = w.Write(js)
-		_, err = w.Write([]byte{'\n'})
-		return err
+		return writeWithNewline(w, js)
 	}
 }
