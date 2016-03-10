@@ -58,8 +58,9 @@ func handleMediaRangeWithAcceptParams(mediaRange string, acceptParams []string) 
 	wv.Weight = ParameteredMediaRangeWeight
 
 	for index := 0; index < len(acceptParams); index++ {
-		if isQualityAcceptParam(acceptParams[index]) {
-			wv.Weight = parseQuality(acceptParams[index])
+		ap := strings.ToLower(acceptParams[index])
+		if isQualityAcceptParam(ap) {
+			wv.Weight = parseQuality(ap)
 		} else {
 			wv.Value = strings.Join([]string{wv.Value, acceptParams[index]}, ";")
 		}
@@ -84,7 +85,7 @@ func handleMediaRangeNoAcceptParams(mediaRange string) weightedValue {
 	wv.Value = strings.TrimSpace(mediaRange)
 	wv.Weight = 0.0
 
-	typeSubtype := strings.Split(mediaRange, "/")
+	typeSubtype := strings.Split(wv.Value, "/")
 	if len(typeSubtype) == 2 {
 		switch {
 		//a type of * with a non-star subtype is invalid, so if the type is

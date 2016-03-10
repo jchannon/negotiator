@@ -6,21 +6,29 @@ import (
 	"strings"
 )
 
+const defaultJsonContentType = "application/json"
+
 type jsonProcessor struct {
 	dense          bool
 	prefix, indent string
+	contentType    string
 }
 
 func NewJSON() ResponseProcessor {
-	return &jsonProcessor{true, "", ""}
+	return &jsonProcessor{true, "", "", defaultJsonContentType}
 }
 
 func NewJSONIndent(prefix, index string) ResponseProcessor {
-	return &jsonProcessor{false, prefix, index}
+	return &jsonProcessor{false, prefix, index, defaultJsonContentType}
 }
 
 func NewJSONIndent2Spaces() ResponseProcessor {
 	return NewJSONIndent("", "  ")
+}
+
+func (p *jsonProcessor) SetContentType(contentType string) ResponseProcessor {
+	p.contentType = contentType
+	return p
 }
 
 func (*jsonProcessor) CanProcess(mediaRange string) bool {
@@ -35,7 +43,7 @@ func (p *jsonProcessor) Process(w http.ResponseWriter, dataModel interface{}) er
 		return nil
 
 	} else {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", p.contentType)
 		if p.dense {
 			return json.NewEncoder(w).Encode(dataModel)
 

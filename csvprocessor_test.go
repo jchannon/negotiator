@@ -11,15 +11,18 @@ import (
 func TestCSVShouldProcessAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
+		expected     bool
 	}{
-		{"text/csv"},
+		{"text/csv", true},
+		{"text/*", true},
+		{"text/plain", false},
 	}
 
 	processor := NewCSV()
 
 	for _, tt := range acceptTests {
 		result := processor.CanProcess(tt.acceptheader)
-		assert.True(t, result, "Should process "+tt.acceptheader)
+		assert.Equal(t, tt.expected, result, "Should process "+tt.acceptheader)
 	}
 }
 
@@ -33,7 +36,7 @@ func TestCSVShouldReturnNoContentIfNil(t *testing.T) {
 	assert.Equal(t, 204, recorder.Code)
 }
 
-func TestCSVShouldSetContentTypeHeader(t *testing.T) {
+func TestCSVShouldSetDefaultContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	processor := NewCSV()
@@ -41,6 +44,16 @@ func TestCSVShouldSetContentTypeHeader(t *testing.T) {
 	processor.Process(recorder, "Joe Bloggs")
 
 	assert.Equal(t, "text/csv", recorder.HeaderMap.Get("Content-Type"))
+}
+
+func TestCSVShouldSetContentTypeHeader(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	processor := NewCSV().SetContentType("text/csv-schema")
+
+	processor.Process(recorder, "Joe Bloggs")
+
+	assert.Equal(t, "text/csv-schema", recorder.HeaderMap.Get("Content-Type"))
 }
 
 func tt(y, m, d int) time.Time {

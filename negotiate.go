@@ -14,10 +14,10 @@ import (
 	"strings"
 )
 
-//Negotiator is responsible for content negotiation when using custom response processors.
+// Negotiator is responsible for content negotiation when using custom response processors.
 type Negotiator struct{ processors []ResponseProcessor }
 
-//New allows users to pass custom response processors. By default XML and JSON are already created.
+// New allows users to pass custom response processors. By default XML and JSON are already created.
 func NewWithJsonAndXml(responseProcessors ...ResponseProcessor) *Negotiator {
 	return New(append(responseProcessors, NewJSON(), NewXML())...)
 }
@@ -29,26 +29,41 @@ func New(responseProcessors ...ResponseProcessor) *Negotiator {
 	}
 }
 
-//Negotiate your model based on the HTTP Accept header.
+// Add more response processors. A new Negotiator is returned with the original processors plus
+// the extra processors.
+func (n *Negotiator) Add(responseProcessors ...ResponseProcessor) *Negotiator {
+	return &Negotiator{
+		append(n.processors, responseProcessors...),
+	}
+}
+
+// Negotiate your model based on the HTTP Accept header.
 func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
 	return negotiateHeader(n.processors, w, req, dataModel)
 }
 
-//Negotiate your model based on the HTTP Accept header. Only XML and JSON are handled.
+// Negotiate your model based on the HTTP Accept header. Only XML and JSON are handled.
 func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) error {
 	processors := []ResponseProcessor{NewJSON(), NewXML()}
 	return negotiateHeader(processors, w, req, model)
 }
 
+// A request without any Accept header field implies that the user agent
+// will accept any media type in response.
+//
+// If the header field is present in a request and none of the available
+// representations for the response have a media type that is listed as
+// acceptable, the origin server can either honour the header field by
+// sending a 406 (Not Acceptable) response or disregard the header field
+// by treating the response as if it is not subject to content negotiation.
+//
+// See rfc7231-sec5.3.2:
+// http://tools.ietf.org/html/rfc7231#section-5.3.2
 func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
 	accept := new(accept)
 
 	accept.Header = req.Header.Get("Accept")
 
-	// http://tools.ietf.org/html/rfc7231#section-5.3.2
-	// rfc7231-sec5.3.2:
-	// A request without any Accept header field implies that the user agent
-	// will accept any media type in response.
 	if accept.Header == "" {
 		return processors[0].Process(w, dataModel)
 	}
@@ -69,11 +84,6 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 		}
 	}
 
-	//rfc2616-sec14.1
-	//If an Accept header field is present, and if the
-	//server cannot send a response which is acceptable according to the combined
-	//Accept field value, then the server SHOULD send a 406 (not acceptable)
-	//response.
 	http.Error(w, "", http.StatusNotAcceptable)
 	return nil
 }

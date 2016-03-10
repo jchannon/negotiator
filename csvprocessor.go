@@ -8,8 +8,11 @@ import (
 	"strings"
 )
 
+const defaultCsvContentType = "text/csv"
+
 type csvProcessor struct {
-	comma rune
+	comma       rune
+	contentType string
 }
 
 // NewCSV creates an output processor that serialises a dataModel in CSV form. With no arguments, the default
@@ -30,13 +33,18 @@ type csvProcessor struct {
 // * []struct for some struct in which all the fields are exported and of simple types (as above).
 func NewCSV(comma ...rune) ResponseProcessor {
 	if len(comma) > 0 {
-		return &csvProcessor{comma[0]}
+		return &csvProcessor{comma[0], defaultCsvContentType}
 	}
-	return &csvProcessor{','}
+	return &csvProcessor{',', defaultCsvContentType}
+}
+
+func (p *csvProcessor) SetContentType(contentType string) ResponseProcessor {
+	p.contentType = contentType
+	return p
 }
 
 func (*csvProcessor) CanProcess(mediaRange string) bool {
-	return strings.EqualFold(mediaRange, "text/csv")
+	return strings.EqualFold(mediaRange, "text/csv") || strings.EqualFold(mediaRange, "text/*")
 }
 
 func (p *csvProcessor) Process(w http.ResponseWriter, dataModel interface{}) error {
@@ -45,7 +53,7 @@ func (p *csvProcessor) Process(w http.ResponseWriter, dataModel interface{}) err
 		return nil
 
 	} else {
-		w.Header().Set("Content-Type", "text/csv")
+		w.Header().Set("Content-Type", p.contentType)
 		writer := csv.NewWriter(w)
 		writer.Comma = p.comma
 		return p.flush(writer, p.process(writer, dataModel))

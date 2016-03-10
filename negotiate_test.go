@@ -91,6 +91,10 @@ func TestShouldNegotiateADefaultProcessor(t *testing.T) {
 
 type fakeProcessor struct{}
 
+func (p *fakeProcessor) SetContentType(contentType string) ResponseProcessor {
+	return p
+}
+
 func (*fakeProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "application/negotiatortesting")
 }

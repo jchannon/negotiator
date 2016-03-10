@@ -7,25 +7,33 @@ import (
 	"strings"
 )
 
+const defaultXmlContentType = "application/xml"
+
 type xmlProcessor struct {
 	dense          bool
 	prefix, indent string
+	contentType    string
 }
 
 func NewXML() ResponseProcessor {
-	return &xmlProcessor{true, "", ""}
+	return &xmlProcessor{true, "", "", defaultXmlContentType}
 }
 
 func NewXMLIndent(prefix, index string) ResponseProcessor {
-	return &xmlProcessor{false, prefix, index}
+	return &xmlProcessor{false, prefix, index, defaultXmlContentType}
 }
 
 func NewXMLIndent2Spaces() ResponseProcessor {
 	return NewXMLIndent("", "  ")
 }
 
+func (p *xmlProcessor) SetContentType(contentType string) ResponseProcessor {
+	p.contentType = contentType
+	return p
+}
+
 func (*xmlProcessor) CanProcess(mediaRange string) bool {
-	return strings.HasSuffix(mediaRange, "xml")
+	return strings.Contains(mediaRange, "/xml") || strings.HasSuffix(mediaRange, "+xml")
 }
 
 func (p *xmlProcessor) Process(w http.ResponseWriter, dataModel interface{}) error {
@@ -34,7 +42,7 @@ func (p *xmlProcessor) Process(w http.ResponseWriter, dataModel interface{}) err
 		return nil
 
 	} else {
-		w.Header().Set("Content-Type", "application/xml")
+		w.Header().Set("Content-Type", p.contentType)
 		if p.dense {
 			return xml.NewEncoder(w).Encode(dataModel)
 

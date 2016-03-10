@@ -16,6 +16,15 @@ func TestParseMediaRanges_parses_single(t *testing.T) {
 	assert.Equal(t, TypeSubtypeMediaRangeWeight, mr[0].Weight)
 }
 
+func TestParseMediaRanges_preserves_case_of_mediaRange(t *testing.T) {
+	a := new(accept)
+	a.Header = "application/CEA"
+	mr := a.ParseMediaRanges()
+
+	assert.Equal(t, 1, len(mr))
+	assert.Equal(t, "application/CEA", mr[0].Value)
+}
+
 func TestParseMediaRanges_defaults_quality_if_not_explicit(t *testing.T) {
 	a := new(accept)
 	a.Header = "text/plain"
@@ -96,8 +105,10 @@ func TestMediaRanges_should_handle_precedence2(t *testing.T) {
 	a.Header = "text/*;q=0.3, text/html;q=0.7, text/html;level=1, text/html;level=2;q=0.4, */*;q=0.5"
 	mr := a.ParseMediaRanges()
 
+	assert.Equal(t, 5, len(mr))
+
 	assert.Equal(t, "text/html;level=1", mr[0].Value)
-	assert.Equal(t, ParameteredMediaRangeWeight, mr[0].Weight)
+	assert.Equal(t, 1.0, mr[0].Weight)
 
 	assert.Equal(t, "text/html", mr[1].Value)
 	assert.Equal(t, 0.7, mr[1].Weight)
@@ -110,5 +121,50 @@ func TestMediaRanges_should_handle_precedence2(t *testing.T) {
 
 	assert.Equal(t, "text/*", mr[4].Value)
 	assert.Equal(t, 0.3, mr[4].Weight)
+}
 
+func TestMediaRanges_should_handle_precedence3(t *testing.T) {
+	a := new(accept)
+	// from http://tools.ietf.org/html/rfc7231#section-5.3.2
+	a.Header = "text/*, text/plain, text/plain;format=flowed, */*"
+	mr := a.ParseMediaRanges()
+
+	assert.Equal(t, 4, len(mr))
+
+	assert.Equal(t, "text/plain;format=flowed", mr[0].Value)
+	assert.Equal(t, 1.0, mr[0].Weight)
+
+	assert.Equal(t, "text/plain", mr[1].Value)
+	assert.Equal(t, 0.9, mr[1].Weight)
+
+	assert.Equal(t, "text/*", mr[2].Value)
+	assert.Equal(t, 0.8, mr[2].Weight)
+
+	assert.Equal(t, "*/*", mr[3].Value)
+	assert.Equal(t, 0.7, mr[3].Weight)
+}
+
+func TestMediaRanges_should_handle_precedence4(t *testing.T) {
+	a := new(accept)
+	// from http://tools.ietf.org/html/rfc7231#section-5.3.1
+	// and http://tools.ietf.org/html/rfc7231#section-5.3.2
+	a.Header = "text/* ; q=0.3, text/html ; Q=0.7, text/html;level=1, text/html;level=2; q=0.4, */*; q=0.5"
+	mr := a.ParseMediaRanges()
+
+	assert.Equal(t, 5, len(mr))
+
+	assert.Equal(t, "text/html;level=1", mr[0].Value)
+	assert.Equal(t, 1.0, mr[0].Weight)
+
+	assert.Equal(t, "text/html", mr[1].Value)
+	assert.Equal(t, 0.7, mr[1].Weight)
+
+	assert.Equal(t, "*/*", mr[2].Value)
+	assert.Equal(t, 0.5, mr[2].Weight)
+
+	assert.Equal(t, "text/html;level=2", mr[3].Value)
+	assert.Equal(t, 0.4, mr[3].Weight)
+
+	assert.Equal(t, "text/*", mr[4].Value)
+	assert.Equal(t, 0.3, mr[4].Weight)
 }

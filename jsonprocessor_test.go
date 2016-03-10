@@ -12,17 +12,19 @@ import (
 func TestJSONShouldProcessAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
+		expected     bool
 	}{
-		{"application/json"},
-		{"application/json-"},
-		{"+json"},
+		{"application/json", true},
+		{"application/json-", true},
+		{"application/CEA", false},
+		{"+json", true},
 	}
 
 	processor := NewJSON()
 
 	for _, tt := range acceptTests {
 		result := processor.CanProcess(tt.acceptheader)
-		assert.True(t, result, "Should process "+tt.acceptheader)
+		assert.Equal(t, tt.expected, result, "Should process "+tt.acceptheader)
 	}
 }
 
@@ -36,7 +38,7 @@ func TestJSONShouldReturnNoContentIfNil(t *testing.T) {
 	assert.Equal(t, 204, recorder.Code)
 }
 
-func TestJSONShouldSetContentTypeHeader(t *testing.T) {
+func TestJSONShouldSetDefaultContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := struct {
@@ -50,6 +52,22 @@ func TestJSONShouldSetContentTypeHeader(t *testing.T) {
 	processor.Process(recorder, model)
 
 	assert.Equal(t, "application/json", recorder.HeaderMap.Get("Content-Type"))
+}
+
+func TestJSONShouldSetContentTypeHeader(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := struct {
+		Name string
+	}{
+		"Joe Bloggs",
+	}
+
+	processor := NewJSON().SetContentType("application/calendar+json")
+
+	processor.Process(recorder, model)
+
+	assert.Equal(t, "application/calendar+json", recorder.HeaderMap.Get("Content-Type"))
 }
 
 func TestJSONShouldSetResponseBody(t *testing.T) {

@@ -13,15 +13,19 @@ import (
 func TestXMLShouldProcessAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
+		expected     bool
 	}{
-		{"application/xml"},
+		{"application/xml", true},
+		{"application/xml-dtd", true},
+		{"application/CEA", false},
+		{"image/svg+xml", true},
 	}
 
 	processor := NewXML()
 
 	for _, tt := range acceptTests {
 		result := processor.CanProcess(tt.acceptheader)
-		assert.True(t, result, "Should process "+tt.acceptheader)
+		assert.Equal(t, tt.expected, result, "Should process "+tt.acceptheader)
 	}
 }
 
@@ -35,7 +39,7 @@ func TestXMLShouldReturnNoContentIfNil(t *testing.T) {
 	assert.Equal(t, 204, recorder.Code)
 }
 
-func TestXMLShouldSetContentTypeHeader(t *testing.T) {
+func TestXMLShouldSetDefaultContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &ValidXMLUser{
@@ -47,6 +51,20 @@ func TestXMLShouldSetContentTypeHeader(t *testing.T) {
 	processor.Process(recorder, model)
 
 	assert.Equal(t, "application/xml", recorder.HeaderMap.Get("Content-Type"))
+}
+
+func TestXMLShouldSetContentTypeHeader(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := &ValidXMLUser{
+		"Joe Bloggs",
+	}
+
+	processor := NewXML().SetContentType("image/svg+xml")
+
+	processor.Process(recorder, model)
+
+	assert.Equal(t, "image/svg+xml", recorder.HeaderMap.Get("Content-Type"))
 }
 
 func TestXMLShouldSetResponseBody(t *testing.T) {
