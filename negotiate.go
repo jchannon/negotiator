@@ -79,7 +79,7 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 		for _, processor := range processors {
 			ajax, doesAjax := processor.(AjaxResponseProcessor)
 			if doesAjax && ajax.IsAjaxResponder() {
-				return processor.Process(w, dataModel)
+				return processor.Process(w, req, dataModel)
 			}
 		}
 	}
@@ -87,7 +87,7 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 	accept := accept(req.Header.Get("Accept"))
 
 	if accept == "" {
-		return processors[0].Process(w, dataModel)
+		return processors[0].Process(w, req, dataModel)
 	}
 
 	for _, mr := range accept.ParseMediaRanges() {
@@ -96,12 +96,12 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 		}
 
 		if strings.EqualFold(mr.Value, "*/*") {
-			return processors[0].Process(w, dataModel)
+			return processors[0].Process(w, req, dataModel)
 		}
 
 		for _, processor := range processors {
 			if processor.CanProcess(mr.Value) {
-				return processor.Process(w, dataModel)
+				return processor.Process(w, req, dataModel)
 			}
 		}
 	}

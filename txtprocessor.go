@@ -35,7 +35,7 @@ func (*txtProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "text/plain") || strings.EqualFold(mediaRange, "text/*")
 }
 
-func (p *txtProcessor) Process(w http.ResponseWriter, dataModel interface{}) error {
+func (p *txtProcessor) Process(w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil

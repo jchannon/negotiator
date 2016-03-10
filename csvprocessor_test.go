@@ -31,7 +31,7 @@ func TestCSVShouldReturnNoContentIfNil(t *testing.T) {
 
 	processor := NewCSV()
 
-	processor.Process(recorder, nil)
+	processor.Process(recorder, nil, nil)
 
 	assert.Equal(t, 204, recorder.Code)
 }
@@ -41,7 +41,7 @@ func TestCSVShouldSetDefaultContentTypeHeader(t *testing.T) {
 
 	processor := NewCSV()
 
-	processor.Process(recorder, "Joe Bloggs")
+	processor.Process(recorder, nil, "Joe Bloggs")
 
 	assert.Equal(t, "text/csv", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -51,7 +51,7 @@ func TestCSVShouldSetContentTypeHeader(t *testing.T) {
 
 	processor := NewCSV().(ContentTypeSettable).SetContentType("text/csv-schema")
 
-	processor.Process(recorder, "Joe Bloggs")
+	processor.Process(recorder, nil, "Joe Bloggs")
 
 	assert.Equal(t, "text/csv-schema", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -85,7 +85,7 @@ func TestCSVShouldSetResponseBody(t *testing.T) {
 
 	for _, m := range models {
 		recorder := httptest.NewRecorder()
-		err := processor.Process(recorder, m.stuff)
+		err := processor.Process(recorder, nil, m.stuff)
 		assert.NoError(t, err)
 		assert.Equal(t, m.expected, recorder.Body.String())
 	}
@@ -113,7 +113,7 @@ func TestCSVShouldSetResponseBodyWithTabs(t *testing.T) {
 
 	for _, m := range models {
 		recorder := httptest.NewRecorder()
-		err := processor.Process(recorder, m.stuff)
+		err := processor.Process(recorder, nil, m.stuff)
 		assert.NoError(t, err)
 		assert.Equal(t, m.expected, recorder.Body.String())
 	}
@@ -124,7 +124,7 @@ func TestCSVShouldReturnErrorOnError(t *testing.T) {
 
 	processor := NewCSV()
 
-	err := processor.Process(recorder, make(chan int, 0))
+	err := processor.Process(recorder, nil, make(chan int, 0))
 
 	assert.Error(t, err)
 }

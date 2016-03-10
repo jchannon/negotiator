@@ -30,7 +30,7 @@ func TestTXTShouldReturnNoContentIfNil(t *testing.T) {
 
 	processor := NewTXT()
 
-	processor.Process(recorder, nil)
+	processor.Process(recorder, nil, nil)
 
 	assert.Equal(t, 204, recorder.Code)
 }
@@ -40,7 +40,7 @@ func TestTXTShouldSetDefaultContentTypeHeader(t *testing.T) {
 
 	processor := NewTXT()
 
-	processor.Process(recorder, "Joe Bloggs")
+	processor.Process(recorder, nil, "Joe Bloggs")
 
 	assert.Equal(t, "text/plain", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -50,7 +50,7 @@ func TestTXTShouldSetContentTypeHeader(t *testing.T) {
 
 	processor := NewTXT().(ContentTypeSettable).SetContentType("text/rtf")
 
-	processor.Process(recorder, "Joe Bloggs")
+	processor.Process(recorder, nil, "Joe Bloggs")
 
 	assert.Equal(t, "text/rtf", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -69,7 +69,7 @@ func TestTXTShouldSetResponseBody(t *testing.T) {
 
 	for _, m := range models {
 		recorder := httptest.NewRecorder()
-		err := processor.Process(recorder, m.stuff)
+		err := processor.Process(recorder, nil, m.stuff)
 		assert.NoError(t, err)
 		assert.Equal(t, m.expected, recorder.Body.String())
 	}
@@ -80,7 +80,7 @@ func TestTXTShouldReturnErrorOnError(t *testing.T) {
 
 	processor := NewTXT()
 
-	err := processor.Process(recorder, make(chan int, 0))
+	err := processor.Process(recorder, nil, make(chan int, 0))
 
 	assert.Error(t, err)
 }

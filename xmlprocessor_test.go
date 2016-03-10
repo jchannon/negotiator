@@ -34,7 +34,7 @@ func TestXMLShouldReturnNoContentIfNil(t *testing.T) {
 
 	processor := NewXML()
 
-	processor.Process(recorder, nil)
+	processor.Process(recorder, nil, nil)
 
 	assert.Equal(t, 204, recorder.Code)
 }
@@ -48,7 +48,7 @@ func TestXMLShouldSetDefaultContentTypeHeader(t *testing.T) {
 
 	processor := NewXML()
 
-	processor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
 	assert.Equal(t, "application/xml", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -62,7 +62,7 @@ func TestXMLShouldSetContentTypeHeader(t *testing.T) {
 
 	processor := NewXML().(ContentTypeSettable).SetContentType("image/svg+xml")
 
-	processor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
 	assert.Equal(t, "image/svg+xml", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -76,7 +76,7 @@ func TestXMLShouldSetResponseBody(t *testing.T) {
 
 	processor := NewXML()
 
-	processor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
 	assert.Equal(t, "<ValidXMLUser><Name>Joe Bloggs</Name></ValidXMLUser>", recorder.Body.String())
 }
@@ -90,7 +90,7 @@ func TestXMlShouldSetResponseBodyWithIndentation(t *testing.T) {
 
 	processor := NewXMLIndent2Spaces()
 
-	processor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
 	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>\n", recorder.Body.String())
 }
@@ -104,7 +104,7 @@ func TestXMLShouldReturnErrorOnError(t *testing.T) {
 
 	processor := NewXMLIndent2Spaces()
 
-	err := processor.Process(recorder, model)
+	err := processor.Process(recorder, nil, model)
 
 	assert.Error(t, err)
 }

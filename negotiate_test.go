@@ -118,7 +118,7 @@ func (*fakeProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "application/negotiatortesting")
 }
 
-func (*fakeProcessor) Process(w http.ResponseWriter, model interface{}) error {
+func (*fakeProcessor) Process(w http.ResponseWriter, req *http.Request, model interface{}) error {
 	w.Write([]byte("boo ya!"))
 	return nil
 }
