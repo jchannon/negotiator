@@ -18,7 +18,7 @@ func TestShouldProcessJSONAcceptHeader(t *testing.T) {
 		{"+json"},
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	jsonProcessor := NewJSON()
 
 	for _, tt := range acceptTests {
 		result := jsonProcessor.CanProcess(tt.acceptheader)
