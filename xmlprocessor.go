@@ -30,6 +30,7 @@ func NewXMLIndent2Spaces() ResponseProcessor {
 	return NewXMLIndent("", "  ")
 }
 
+// Implements ContentTypeSettable for this type.
 func (p *xmlProcessor) SetContentType(contentType string) ResponseProcessor {
 	p.contentType = contentType
 	return p

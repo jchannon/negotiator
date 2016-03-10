@@ -1,6 +1,7 @@
 package negotiator
 
 import (
+	"encoding"
 	"fmt"
 	"net/http"
 	"strings"
@@ -18,10 +19,13 @@ type txtProcessor struct {
 // * string
 //
 // * fmt.Stringer
+//
+// * encoding.TextMarshaler
 func NewTXT() ResponseProcessor {
 	return &txtProcessor{defaultTxtContentType}
 }
 
+// Implements ContentTypeSettable for this type.
 func (p *txtProcessor) SetContentType(contentType string) ResponseProcessor {
 	p.contentType = contentType
 	return p
@@ -51,6 +55,16 @@ func (p *txtProcessor) process(w http.ResponseWriter, dataModel interface{}) err
 	st, ok := dataModel.(fmt.Stringer)
 	if ok {
 		writeWithNewline(w, []byte(st.String()))
+		return nil
+	}
+
+	tm, ok := dataModel.(encoding.TextMarshaler)
+	if ok {
+		b, err := tm.MarshalText()
+		if err != nil {
+			return err
+		}
+		writeWithNewline(w, b)
 		return nil
 	}
 

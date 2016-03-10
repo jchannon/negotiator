@@ -38,6 +38,7 @@ func NewCSV(comma ...rune) ResponseProcessor {
 	return &csvProcessor{',', defaultCSVContentType}
 }
 
+// Implements ContentTypeSettable for this type.
 func (p *csvProcessor) SetContentType(contentType string) ResponseProcessor {
 	p.contentType = contentType
 	return p

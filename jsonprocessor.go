@@ -14,7 +14,7 @@ type jsonProcessor struct {
 	contentType    string
 }
 
-// NewJSON creates a new processor for XML withOUT indentation.
+// NewJSON creates a new processor for XML without indentation.
 func NewJSON() ResponseProcessor {
 	return &jsonProcessor{true, "", "", defaultJSONContentType}
 }
@@ -29,11 +29,13 @@ func NewJSONIndent2Spaces() ResponseProcessor {
 	return NewJSONIndent("", "  ")
 }
 
+// Implements ContentTypeSettable for this type.
 func (p *jsonProcessor) SetContentType(contentType string) ResponseProcessor {
 	p.contentType = contentType
 	return p
 }
 
+// Implements AjaxResponseProcessor for this type.
 func (*jsonProcessor) IsAjaxResponder() bool {
 	return true
 }

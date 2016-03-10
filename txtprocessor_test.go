@@ -62,6 +62,7 @@ func TestTXTShouldSetResponseBody(t *testing.T) {
 	}{
 		{"Joe Bloggs", "Joe Bloggs\n"},
 		{hidden{tt(2001, 10, 31)}, "(2001-10-31)\n"},
+		{tm{"Joe Bloggs"}, "Joe Bloggs\n"},
 	}
 
 	processor := NewTXT()
@@ -82,4 +83,12 @@ func TestTXTShouldReturnErrorOnError(t *testing.T) {
 	err := processor.Process(recorder, make(chan int, 0))
 
 	assert.Error(t, err)
+}
+
+type tm struct {
+	s string
+}
+
+func (tm tm) MarshalText() (text []byte, err error) {
+	return []byte(tm.s), nil
 }
