@@ -20,7 +20,7 @@ func NewXML() ResponseProcessor {
 	return &xmlProcessor{true, "", "", defaultXMLContentType}
 }
 
-// NewXMLIndent creates a new processor for XML with specified indentation.
+// NewXMLIndent creates a new processor for XML with a specified indentation.
 func NewXMLIndent(prefix, index string) ResponseProcessor {
 	return &xmlProcessor{false, prefix, index, defaultXMLContentType}
 }

@@ -14,17 +14,17 @@ type jsonProcessor struct {
 	contentType    string
 }
 
-// NewJSON creates a new processor for XML without indentation.
+// NewJSON creates a new processor for JSON without indentation.
 func NewJSON() ResponseProcessor {
 	return &jsonProcessor{true, "", "", defaultJSONContentType}
 }
 
-// NewJSONIndent creates a new processor for XML with specified indentation.
+// NewJSONIndent creates a new processor for JSON with a specified indentation.
 func NewJSONIndent(prefix, index string) ResponseProcessor {
 	return &jsonProcessor{false, prefix, index, defaultJSONContentType}
 }
 
-// NewJSONIndent2Spaces creates a new processor for XML with 2-space indentation.
+// NewJSONIndent2Spaces creates a new processor for JSON with 2-space indentation.
 func NewJSONIndent2Spaces() ResponseProcessor {
 	return NewJSONIndent("", "  ")
 }
