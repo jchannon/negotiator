@@ -34,6 +34,10 @@ func (p *jsonProcessor) SetContentType(contentType string) ResponseProcessor {
 	return p
 }
 
+func (*jsonProcessor) IsAjaxResponder() bool {
+	return true
+}
+
 func (*jsonProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "application/json") ||
 		strings.HasPrefix(mediaRange, "application/json-") ||

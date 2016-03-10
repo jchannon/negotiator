@@ -49,6 +49,21 @@ func TestShouldReturnDefaultProcessorIfNoAcceptHeader(t *testing.T) {
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 }
 
+func TestShouldGiveJSONResponseForAjaxRequests(t *testing.T) {
+	negotiator := NewWithJSONAndXML()
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	req.Header.Add(xRequestedWith, xmlHttpRequest)
+	recorder := httptest.NewRecorder()
+
+	model := &ValidXMLUser{
+		"Joe Bloggs",
+	}
+	negotiator.Negotiate(recorder, req, model)
+
+	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}\n", recorder.Body.String())
+}
+
 func TestShouldReturn406IfNoMatchingAcceptHeader(t *testing.T) {
 	var fakeResponseProcessor = &fakeProcessor{}
 	negotiator := New(fakeResponseProcessor)
@@ -98,10 +113,6 @@ func TestShouldNegotiateADefaultProcessor(t *testing.T) {
 }
 
 type fakeProcessor struct{}
-
-func (p *fakeProcessor) SetContentType(contentType string) ResponseProcessor {
-	return p
-}
 
 func (*fakeProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "application/negotiatortesting")

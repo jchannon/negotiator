@@ -60,7 +60,7 @@ func TestXMLShouldSetContentTypeHeader(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	processor := NewXML().SetContentType("image/svg+xml")
+	processor := NewXML().(ContentTypeSettable).SetContentType("image/svg+xml")
 
 	processor.Process(recorder, model)
 

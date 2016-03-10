@@ -22,14 +22,12 @@ const (
 )
 
 // Accept is an http accept
-type accept struct {
-	Header string
-}
+type accept string
 
 // MediaRanges returns prioritized media ranges
-func (accept *accept) ParseMediaRanges() []weightedValue {
+func (accept accept) ParseMediaRanges() []weightedValue {
 	var retVals []weightedValue
-	mrs := strings.Split(accept.Header, ",")
+	mrs := strings.Split(string(accept), ",")
 
 	for _, mr := range mrs {
 		mrAndAcceptParam := strings.Split(mr, ";")

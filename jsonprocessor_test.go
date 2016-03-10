@@ -38,6 +38,12 @@ func TestJSONShouldReturnNoContentIfNil(t *testing.T) {
 	assert.Equal(t, 204, recorder.Code)
 }
 
+func TestJSONShouldHandleAjax(t *testing.T) {
+	processor := NewJSON()
+
+	assert.True(t, processor.(AjaxResponseProcessor).IsAjaxResponder())
+}
+
 func TestJSONShouldSetDefaultContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
@@ -63,7 +69,7 @@ func TestJSONShouldSetContentTypeHeader(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	processor := NewJSON().SetContentType("application/calendar+json")
+	processor := NewJSON().(ContentTypeSettable).SetContentType("application/calendar+json")
 
 	processor.Process(recorder, model)
 

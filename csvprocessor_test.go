@@ -49,7 +49,7 @@ func TestCSVShouldSetDefaultContentTypeHeader(t *testing.T) {
 func TestCSVShouldSetContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	processor := NewCSV().SetContentType("text/csv-schema")
+	processor := NewCSV().(ContentTypeSettable).SetContentType("text/csv-schema")
 
 	processor.Process(recorder, "Joe Bloggs")
 

@@ -48,7 +48,7 @@ func TestTXTShouldSetDefaultContentTypeHeader(t *testing.T) {
 func TestTXTShouldSetContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	processor := NewTXT().SetContentType("text/rtf")
+	processor := NewTXT().(ContentTypeSettable).SetContentType("text/rtf")
 
 	processor.Process(recorder, "Joe Bloggs")
 

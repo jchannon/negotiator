@@ -1,9 +1,14 @@
-//Package negotiator is a library that handles content negotiation in web applications written in Go.
+// Package negotiator is a library that handles content negotiation in web applications written in Go.
+// Content negotiation is specified by RFC (http://tools.ietf.org/html/rfc7231) and, less formally, by
+// Ajax (https://en.wikipedia.org/wiki/XMLHttpRequest).
 //
-//For more information visit http://github.com/jchannon/negotiator
+// A Negotiator contains a list of ResponseProcessor. For each call to Negotiate, the best matching
+// response processor is chosen and given the task of sending the response.
+//
+// For more information visit http://github.com/jchannon/negotiator
 //
 //	func getUser(w http.ResponseWriter, req *http.Request) {
-//	    user := &User{"Joe","Bloggs"}
+//	    user := &User{"Joe", "Bloggs"}
 //	    negotiator.Negotiate(w, req, user)
 //	}
 //
@@ -12,6 +17,11 @@ package negotiator
 import (
 	"net/http"
 	"strings"
+)
+
+const (
+	xRequestedWith = "X-Requested-With"
+	xmlHttpRequest = "XMLHttpRequest"
 )
 
 // Negotiator is responsible for content negotiation when using custom response processors.
@@ -49,6 +59,9 @@ func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) erro
 	return negotiateHeader(processors, w, req, model)
 }
 
+// Firstly, all Ajax requests are processed by the first available Ajax processor.
+// Otherwise, standard content negotiation kicks in.
+//
 // A request without any Accept header field implies that the user agent
 // will accept any media type in response.
 //
@@ -62,11 +75,18 @@ func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) erro
 // See rfc7231-sec5.3.2:
 // http://tools.ietf.org/html/rfc7231#section-5.3.2
 func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
-	accept := new(accept)
+	if IsAjax(req) {
+		for _, processor := range processors {
+			ajax, doesAjax := processor.(AjaxResponseProcessor)
+			if doesAjax && ajax.IsAjaxResponder() {
+				return processor.Process(w, dataModel)
+			}
+		}
+	}
 
-	accept.Header = req.Header.Get("Accept")
+	accept := accept(req.Header.Get("Accept"))
 
-	if accept.Header == "" {
+	if accept == "" {
 		return processors[0].Process(w, dataModel)
 	}
 
@@ -88,4 +108,10 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 
 	http.Error(w, "", http.StatusNotAcceptable)
 	return nil
+}
+
+// IsAjax tests whether a request has the Ajax header.
+func IsAjax(req *http.Request) bool {
+	xRequestedWith, ok := req.Header[xRequestedWith]
+	return ok && len(xRequestedWith) == 1 && xRequestedWith[0] == xmlHttpRequest
 }
