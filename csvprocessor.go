@@ -1,11 +1,11 @@
 package negotiator
 
 import (
-	"net/http"
-	"strings"
 	"encoding/csv"
 	"fmt"
+	"net/http"
 	"reflect"
+	"strings"
 )
 
 type csvProcessor struct {

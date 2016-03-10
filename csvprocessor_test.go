@@ -19,7 +19,7 @@ func TestCSVShouldProcessAcceptHeader(t *testing.T) {
 
 	for _, tt := range acceptTests {
 		result := csvProcessor.CanProcess(tt.acceptheader)
-		assert.True(t, result, "Should process " + tt.acceptheader)
+		assert.True(t, result, "Should process "+tt.acceptheader)
 	}
 }
 
@@ -52,10 +52,10 @@ func TestCSVShouldSetResponseBody(t *testing.T) {
 		{[][]int{[]int{101, 42}, []int{39, 7}}, "101,42\n39,7\n"},
 		{[][]uint{[]uint{101, 42}, []uint{39, 7}}, "101,42\n39,7\n"},
 		{Data{"x", 9, 4, true}, "x,9,4,true\n"},
-		{[]Data{Data{"x", 9, 4, true},Data{"y", 7, 1, false}}, "x,9,4,true\ny,7,1,false\n"},
+		{[]Data{Data{"x", 9, 4, true}, Data{"y", 7, 1, false}}, "x,9,4,true\ny,7,1,false\n"},
 		{hidden{tt(2001, 10, 31)}, "(2001-10-31)\n"},
 		{[]hidden{hidden{tt(2001, 11, 29)}, hidden{tt(2001, 11, 30)}}, "(2001-11-29),(2001-11-30)\n"},
-		{[][]hidden{[]hidden{hidden{tt(2001, 12, 30)},hidden{tt(2001, 12, 31)}}}, "(2001-12-30),(2001-12-31)\n"},
+		{[][]hidden{[]hidden{hidden{tt(2001, 12, 30)}, hidden{tt(2001, 12, 31)}}}, "(2001-12-30),(2001-12-31)\n"},
 	}
 
 	csvProcessor := NewCSV()
@@ -83,7 +83,7 @@ func TestCSVShouldSetResponseBodyWithTabs(t *testing.T) {
 		{[][]int{[]int{101, 42}, []int{39, 7}}, "101\t42\n39\t7\n"},
 		{[][]uint{[]uint{101, 42}, []uint{39, 7}}, "101\t42\n39\t7\n"},
 		{Data{"x", 9, 4, true}, "x\t9\t4\ttrue\n"},
-		{[]Data{Data{"x", 9, 4, true},Data{"y", 7, 1, false}}, "x\t9\t4\ttrue\ny\t7\t1\tfalse\n"},
+		{[]Data{Data{"x", 9, 4, true}, Data{"y", 7, 1, false}}, "x\t9\t4\ttrue\ny\t7\t1\tfalse\n"},
 	}
 
 	csvProcessor := NewCSV('\t')
