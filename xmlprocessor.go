@@ -43,20 +43,19 @@ func (p *xmlProcessor) Process(w http.ResponseWriter, dataModel interface{}) err
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil
-
-	} else {
-		w.Header().Set("Content-Type", p.contentType)
-		if p.dense {
-			return xml.NewEncoder(w).Encode(dataModel)
-		}
-
-		x, err := xml.MarshalIndent(dataModel, p.prefix, p.indent)
-		if err != nil {
-			return err
-		}
-
-		return writeWithNewline(w, x)
 	}
+
+	w.Header().Set("Content-Type", p.contentType)
+	if p.dense {
+		return xml.NewEncoder(w).Encode(dataModel)
+	}
+
+	x, err := xml.MarshalIndent(dataModel, p.prefix, p.indent)
+	if err != nil {
+		return err
+	}
+
+	return writeWithNewline(w, x)
 }
 
 func writeWithNewline(w io.Writer, x []byte) error {

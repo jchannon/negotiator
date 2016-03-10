@@ -49,14 +49,13 @@ func (p *jsonProcessor) Process(w http.ResponseWriter, dataModel interface{}) er
 	w.Header().Set("Content-Type", p.contentType)
 	if p.dense {
 		return json.NewEncoder(w).Encode(dataModel)
-
-	} else {
-		js, err := json.MarshalIndent(dataModel, p.prefix, p.indent)
-
-		if err != nil {
-			return err
-		}
-
-		return writeWithNewline(w, js)
 	}
+
+	js, err := json.MarshalIndent(dataModel, p.prefix, p.indent)
+
+	if err != nil {
+		return err
+	}
+
+	return writeWithNewline(w, js)
 }

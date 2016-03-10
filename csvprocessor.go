@@ -51,13 +51,12 @@ func (p *csvProcessor) Process(w http.ResponseWriter, dataModel interface{}) err
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil
-
-	} else {
-		w.Header().Set("Content-Type", p.contentType)
-		writer := csv.NewWriter(w)
-		writer.Comma = p.comma
-		return p.flush(writer, p.process(writer, dataModel))
 	}
+
+	w.Header().Set("Content-Type", p.contentType)
+	writer := csv.NewWriter(w)
+	writer.Comma = p.comma
+	return p.flush(writer, p.process(writer, dataModel))
 }
 
 func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error {
