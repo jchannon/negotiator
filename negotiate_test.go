@@ -13,7 +13,15 @@ import (
 func TestShouldAddCustomResponseProcessors(t *testing.T) {
 
 	var fakeResponseProcessor = &fakeProcessor{}
-	negotiator := NewWithJsonAndXml(fakeResponseProcessor)
+	negotiator := NewWithJSONAndXML(fakeResponseProcessor)
+
+	assert.Equal(t, 3, len(negotiator.processors))
+}
+
+func TestShouldAddCustomResponseProcessors2(t *testing.T) {
+
+	var fakeResponseProcessor = &fakeProcessor{}
+	negotiator := New().Add(NewJSON(), NewXML()).Add(fakeResponseProcessor)
 
 	assert.Equal(t, 3, len(negotiator.processors))
 }
@@ -21,7 +29,7 @@ func TestShouldAddCustomResponseProcessors(t *testing.T) {
 func TestShouldAddCustomResponseProcessorsToBeginning(t *testing.T) {
 
 	var fakeResponseProcessor = &fakeProcessor{}
-	negotiator := New(fakeResponseProcessor)
+	negotiator := NewWithJSONAndXML(fakeResponseProcessor)
 
 	firstProcessor := negotiator.processors[0]
 	processorName := reflect.TypeOf(firstProcessor).String()

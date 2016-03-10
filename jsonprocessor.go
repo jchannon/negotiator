@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const defaultJsonContentType = "application/json"
+const defaultJSONContentType = "application/json"
 
 type jsonProcessor struct {
 	dense          bool
@@ -14,14 +14,17 @@ type jsonProcessor struct {
 	contentType    string
 }
 
+// NewJSON creates a new processor for XML withOUT indentation.
 func NewJSON() ResponseProcessor {
-	return &jsonProcessor{true, "", "", defaultJsonContentType}
+	return &jsonProcessor{true, "", "", defaultJSONContentType}
 }
 
+// NewJSONIndent creates a new processor for XML with specified indentation.
 func NewJSONIndent(prefix, index string) ResponseProcessor {
-	return &jsonProcessor{false, prefix, index, defaultJsonContentType}
+	return &jsonProcessor{false, prefix, index, defaultJSONContentType}
 }
 
+// NewJSONIndent2Spaces creates a new processor for XML with 2-space indentation.
 func NewJSONIndent2Spaces() ResponseProcessor {
 	return NewJSONIndent("", "  ")
 }
@@ -41,20 +44,19 @@ func (p *jsonProcessor) Process(w http.ResponseWriter, dataModel interface{}) er
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil
+	}
+
+	w.Header().Set("Content-Type", p.contentType)
+	if p.dense {
+		return json.NewEncoder(w).Encode(dataModel)
 
 	} else {
-		w.Header().Set("Content-Type", p.contentType)
-		if p.dense {
-			return json.NewEncoder(w).Encode(dataModel)
+		js, err := json.MarshalIndent(dataModel, p.prefix, p.indent)
 
-		} else {
-			js, err := json.MarshalIndent(dataModel, p.prefix, p.indent)
-
-			if err != nil {
-				return err
-			}
-
-			return writeWithNewline(w, js)
+		if err != nil {
+			return err
 		}
+
+		return writeWithNewline(w, js)
 	}
 }

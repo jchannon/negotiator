@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const defaultXmlContentType = "application/xml"
+const defaultXMLContentType = "application/xml"
 
 type xmlProcessor struct {
 	dense          bool
@@ -15,14 +15,17 @@ type xmlProcessor struct {
 	contentType    string
 }
 
+// NewXML creates a new processor for XML without indentation.
 func NewXML() ResponseProcessor {
-	return &xmlProcessor{true, "", "", defaultXmlContentType}
+	return &xmlProcessor{true, "", "", defaultXMLContentType}
 }
 
+// NewXMLIndent creates a new processor for XML with specified indentation.
 func NewXMLIndent(prefix, index string) ResponseProcessor {
-	return &xmlProcessor{false, prefix, index, defaultXmlContentType}
+	return &xmlProcessor{false, prefix, index, defaultXMLContentType}
 }
 
+// NewXMLIndent2Spaces creates a new processor for XML with 2-space indentation.
 func NewXMLIndent2Spaces() ResponseProcessor {
 	return NewXMLIndent("", "  ")
 }
@@ -45,15 +48,14 @@ func (p *xmlProcessor) Process(w http.ResponseWriter, dataModel interface{}) err
 		w.Header().Set("Content-Type", p.contentType)
 		if p.dense {
 			return xml.NewEncoder(w).Encode(dataModel)
-
-		} else {
-			x, err := xml.MarshalIndent(dataModel, p.prefix, p.indent)
-			if err != nil {
-				return err
-			}
-
-			return writeWithNewline(w, x)
 		}
+
+		x, err := xml.MarshalIndent(dataModel, p.prefix, p.indent)
+		if err != nil {
+			return err
+		}
+
+		return writeWithNewline(w, x)
 	}
 }
 

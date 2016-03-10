@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const defaultCsvContentType = "text/csv"
+const defaultCSVContentType = "text/csv"
 
 type csvProcessor struct {
 	comma       rune
@@ -33,9 +33,9 @@ type csvProcessor struct {
 // * []struct for some struct in which all the fields are exported and of simple types (as above).
 func NewCSV(comma ...rune) ResponseProcessor {
 	if len(comma) > 0 {
-		return &csvProcessor{comma[0], defaultCsvContentType}
+		return &csvProcessor{comma[0], defaultCSVContentType}
 	}
-	return &csvProcessor{',', defaultCsvContentType}
+	return &csvProcessor{',', defaultCSVContentType}
 }
 
 func (p *csvProcessor) SetContentType(contentType string) ResponseProcessor {

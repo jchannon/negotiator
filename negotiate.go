@@ -17,8 +17,9 @@ import (
 // Negotiator is responsible for content negotiation when using custom response processors.
 type Negotiator struct{ processors []ResponseProcessor }
 
-// New allows users to pass custom response processors. By default XML and JSON are already created.
-func NewWithJsonAndXml(responseProcessors ...ResponseProcessor) *Negotiator {
+// NewWithJSONAndXML allows users to pass custom response processors. By default, processors
+// for XML and JSON are already created.
+func NewWithJSONAndXML(responseProcessors ...ResponseProcessor) *Negotiator {
 	return New(append(responseProcessors, NewJSON(), NewXML())...)
 }
 
@@ -56,6 +57,7 @@ func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) erro
 // acceptable, the origin server can either honour the header field by
 // sending a 406 (Not Acceptable) response or disregard the header field
 // by treating the response as if it is not subject to content negotiation.
+// This implementation prefers the former.
 //
 // See rfc7231-sec5.3.2:
 // http://tools.ietf.org/html/rfc7231#section-5.3.2
