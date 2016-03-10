@@ -30,8 +30,8 @@ func New(responseProcessors ...ResponseProcessor) *Negotiator {
 }
 
 //Negotiate your model based on the HTTP Accept header.
-func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) error {
-	return negotiateHeader(n.processors, w, req, model)
+func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
+	return negotiateHeader(n.processors, w, req, dataModel)
 }
 
 //Negotiate your model based on the HTTP Accept header. Only XML and JSON are handled.
@@ -40,7 +40,7 @@ func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) erro
 	return negotiateHeader(processors, w, req, model)
 }
 
-func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, model interface{}) error {
+func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
 	accept := new(accept)
 
 	accept.Header = req.Header.Get("Accept")
@@ -50,7 +50,7 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 	// A request without any Accept header field implies that the user agent
 	// will accept any media type in response.
 	if accept.Header == "" {
-		return processors[0].Process(w, model)
+		return processors[0].Process(w, dataModel)
 	}
 
 	for _, mr := range accept.ParseMediaRanges() {
@@ -59,12 +59,12 @@ func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req 
 		}
 
 		if strings.EqualFold(mr.Value, "*/*") {
-			return processors[0].Process(w, model)
+			return processors[0].Process(w, dataModel)
 		}
 
 		for _, processor := range processors {
 			if processor.CanProcess(mr.Value) {
-				return processor.Process(w, model)
+				return processor.Process(w, dataModel)
 			}
 		}
 	}

@@ -15,20 +15,30 @@ func TestCSVShouldProcessAcceptHeader(t *testing.T) {
 		{"text/csv"},
 	}
 
-	csvProcessor := NewCSV()
+	processor := NewCSV()
 
 	for _, tt := range acceptTests {
-		result := csvProcessor.CanProcess(tt.acceptheader)
+		result := processor.CanProcess(tt.acceptheader)
 		assert.True(t, result, "Should process "+tt.acceptheader)
 	}
+}
+
+func TestCSVShouldReturnNoContentIfNil(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	processor := NewCSV()
+
+	processor.Process(recorder, nil)
+
+	assert.Equal(t, 204, recorder.Code)
 }
 
 func TestCSVShouldSetContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	csvProcessor := NewCSV()
+	processor := NewCSV()
 
-	csvProcessor.Process(recorder, "Joe Bloggs")
+	processor.Process(recorder, "Joe Bloggs")
 
 	assert.Equal(t, "text/csv", recorder.HeaderMap.Get("Content-Type"))
 }
@@ -58,11 +68,11 @@ func TestCSVShouldSetResponseBody(t *testing.T) {
 		{[][]hidden{[]hidden{hidden{tt(2001, 12, 30)}, hidden{tt(2001, 12, 31)}}}, "(2001-12-30),(2001-12-31)\n"},
 	}
 
-	csvProcessor := NewCSV()
+	processor := NewCSV()
 
 	for _, m := range models {
 		recorder := httptest.NewRecorder()
-		err := csvProcessor.Process(recorder, m.stuff)
+		err := processor.Process(recorder, m.stuff)
 		assert.NoError(t, err)
 		assert.Equal(t, m.expected, recorder.Body.String())
 	}
@@ -86,22 +96,22 @@ func TestCSVShouldSetResponseBodyWithTabs(t *testing.T) {
 		{[]Data{Data{"x", 9, 4, true}, Data{"y", 7, 1, false}}, "x\t9\t4\ttrue\ny\t7\t1\tfalse\n"},
 	}
 
-	csvProcessor := NewCSV('\t')
+	processor := NewCSV('\t')
 
 	for _, m := range models {
 		recorder := httptest.NewRecorder()
-		err := csvProcessor.Process(recorder, m.stuff)
+		err := processor.Process(recorder, m.stuff)
 		assert.NoError(t, err)
 		assert.Equal(t, m.expected, recorder.Body.String())
 	}
 }
 
-func TestCSVShouldReturnErrorOnJsonError(t *testing.T) {
+func TestCSVShouldReturnErrorOnError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	csvProcessor := NewCSV()
+	processor := NewCSV()
 
-	err := csvProcessor.Process(recorder, nil)
+	err := processor.Process(recorder, make(chan int, 0))
 
 	assert.Error(t, err)
 }

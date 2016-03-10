@@ -29,18 +29,24 @@ func (*jsonProcessor) CanProcess(mediaRange string) bool {
 		strings.HasSuffix(mediaRange, "+json")
 }
 
-func (p *jsonProcessor) Process(w http.ResponseWriter, model interface{}) error {
-	w.Header().Set("Content-Type", "application/json")
-	if p.dense {
-		return json.NewEncoder(w).Encode(model)
+func (p *jsonProcessor) Process(w http.ResponseWriter, dataModel interface{}) error {
+	if dataModel == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
 
 	} else {
-		js, err := json.MarshalIndent(model, p.prefix, p.indent)
+		w.Header().Set("Content-Type", "application/json")
+		if p.dense {
+			return json.NewEncoder(w).Encode(dataModel)
 
-		if err != nil {
-			return err
+		} else {
+			js, err := json.MarshalIndent(dataModel, p.prefix, p.indent)
+
+			if err != nil {
+				return err
+			}
+
+			return writeWithNewline(w, js)
 		}
-
-		return writeWithNewline(w, js)
 	}
 }

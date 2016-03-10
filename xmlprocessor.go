@@ -28,18 +28,24 @@ func (*xmlProcessor) CanProcess(mediaRange string) bool {
 	return strings.HasSuffix(mediaRange, "xml")
 }
 
-func (p *xmlProcessor) Process(w http.ResponseWriter, model interface{}) error {
-	w.Header().Set("Content-Type", "application/xml")
-	if p.dense {
-		return xml.NewEncoder(w).Encode(model)
+func (p *xmlProcessor) Process(w http.ResponseWriter, dataModel interface{}) error {
+	if dataModel == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
 
 	} else {
-		x, err := xml.MarshalIndent(model, p.prefix, p.indent)
-		if err != nil {
-			return err
-		}
+		w.Header().Set("Content-Type", "application/xml")
+		if p.dense {
+			return xml.NewEncoder(w).Encode(dataModel)
 
-		return writeWithNewline(w, x)
+		} else {
+			x, err := xml.MarshalIndent(dataModel, p.prefix, p.indent)
+			if err != nil {
+				return err
+			}
+
+			return writeWithNewline(w, x)
+		}
 	}
 }
 

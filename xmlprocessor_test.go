@@ -10,73 +10,83 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldProcessXMLAcceptHeader(t *testing.T) {
+func TestXMLShouldProcessAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
 	}{
 		{"application/xml"},
 	}
 
-	xmlProcessor := NewXML()
+	processor := NewXML()
 
 	for _, tt := range acceptTests {
-		result := xmlProcessor.CanProcess(tt.acceptheader)
+		result := processor.CanProcess(tt.acceptheader)
 		assert.True(t, result, "Should process "+tt.acceptheader)
 	}
 }
 
-func TestShouldSetXmlContentTypeHeader(t *testing.T) {
+func TestXMLShouldReturnNoContentIfNil(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	processor := NewXML()
+
+	processor.Process(recorder, nil)
+
+	assert.Equal(t, 204, recorder.Code)
+}
+
+func TestXMLShouldSetContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &ValidXMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := NewXML()
+	processor := NewXML()
 
-	xmlProcessor.Process(recorder, model)
+	processor.Process(recorder, model)
 
 	assert.Equal(t, "application/xml", recorder.HeaderMap.Get("Content-Type"))
 }
 
-func TestShouldSetXmlResponseBody(t *testing.T) {
+func TestXMLShouldSetResponseBody(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &ValidXMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := NewXML()
+	processor := NewXML()
 
-	xmlProcessor.Process(recorder, model)
+	processor.Process(recorder, model)
 
 	assert.Equal(t, "<ValidXMLUser><Name>Joe Bloggs</Name></ValidXMLUser>", recorder.Body.String())
 }
 
-func TestShouldSetXmlResponseBodyWithIndentation(t *testing.T) {
+func TestXMlShouldSetResponseBodyWithIndentation(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &ValidXMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := NewXMLIndent2Spaces()
+	processor := NewXMLIndent2Spaces()
 
-	xmlProcessor.Process(recorder, model)
+	processor.Process(recorder, model)
 
 	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>\n", recorder.Body.String())
 }
 
-func TestShouldReturnErrorOnXmlError(t *testing.T) {
+func TestXMLShouldReturnErrorOnError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &XMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := NewXMLIndent2Spaces()
+	processor := NewXMLIndent2Spaces()
 
-	err := xmlProcessor.Process(recorder, model)
+	err := processor.Process(recorder, model)
 
 	assert.Error(t, err)
 }

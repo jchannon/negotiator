@@ -58,7 +58,7 @@ func TestShouldReturn406IfNoAcceptHeaderWithoutCustomResponseProcessor(t *testin
 	req, _ := http.NewRequest("GET", "/", nil)
 	recorder := httptest.NewRecorder()
 
-	Negotiate(recorder, req, nil)
+	Negotiate(recorder, req, "foo")
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
 }

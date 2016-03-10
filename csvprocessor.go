@@ -12,7 +12,7 @@ type csvProcessor struct {
 	comma rune
 }
 
-// NewCSV creates an output processor that serialises a model in CSV form. With no arguments, the default
+// NewCSV creates an output processor that serialises a dataModel in CSV form. With no arguments, the default
 // format is comma-separated; you can supply any rune to be used as an alternative separator.
 //
 // Model values should be one of the following:
@@ -39,15 +39,21 @@ func (*csvProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "text/csv")
 }
 
-func (p *csvProcessor) Process(w http.ResponseWriter, model interface{}) error {
-	w.Header().Set("Content-Type", "text/csv")
-	writer := csv.NewWriter(w)
-	writer.Comma = p.comma
-	return p.flush(writer, p.process(writer, model))
+func (p *csvProcessor) Process(w http.ResponseWriter, dataModel interface{}) error {
+	if dataModel == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+
+	} else {
+		w.Header().Set("Content-Type", "text/csv")
+		writer := csv.NewWriter(w)
+		writer.Comma = p.comma
+		return p.flush(writer, p.process(writer, dataModel))
+	}
 }
 
-func (p *csvProcessor) process(writer *csv.Writer, model interface{}) error {
-	switch v := model.(type) {
+func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error {
+	switch v := dataModel.(type) {
 	case string:
 		return writer.Write([]string{v})
 	case []string:
@@ -56,12 +62,12 @@ func (p *csvProcessor) process(writer *csv.Writer, model interface{}) error {
 		return writer.WriteAll(v)
 	}
 
-	s, ok := model.(fmt.Stringer)
+	s, ok := dataModel.(fmt.Stringer)
 	if ok {
 		return writer.Write([]string{s.String()})
 	}
 
-	value := reflect.Indirect(reflect.ValueOf(model))
+	value := reflect.Indirect(reflect.ValueOf(dataModel))
 
 	switch value.Kind() {
 	case reflect.Struct:
@@ -69,7 +75,7 @@ func (p *csvProcessor) process(writer *csv.Writer, model interface{}) error {
 			return nil // nothing to write
 		}
 
-		return writeStructFields(writer, value, model)
+		return writeStructFields(writer, value, dataModel)
 
 	case reflect.Array, reflect.Slice:
 		if value.Len() == 0 {
@@ -97,7 +103,7 @@ func (p *csvProcessor) process(writer *csv.Writer, model interface{}) error {
 				return writeArrayOfStringers(writer, value)
 			}
 
-			return writeArrayOfStructFields(writer, value, model)
+			return writeArrayOfStructFields(writer, value, dataModel)
 
 		case reflect.Array, reflect.Slice:
 			if v0.Len() == 0 {
@@ -119,12 +125,12 @@ func (p *csvProcessor) process(writer *csv.Writer, model interface{}) error {
 		}
 	}
 
-	return fmt.Errorf("Unsupported type for CSV: %T", model)
+	return fmt.Errorf("Unsupported type for CSV: %T", dataModel)
 }
 
-func writeArrayOfStructFields(writer *csv.Writer, value reflect.Value, model interface{}) error {
+func writeArrayOfStructFields(writer *csv.Writer, value reflect.Value, dataModel interface{}) error {
 	for j := 0; j < value.Len(); j++ {
-		err := writeStructFields(writer, value.Index(j), model)
+		err := writeStructFields(writer, value.Index(j), dataModel)
 		if err != nil {
 			return err
 		}
@@ -132,7 +138,7 @@ func writeArrayOfStructFields(writer *csv.Writer, value reflect.Value, model int
 	return nil
 }
 
-func writeStructFields(writer *csv.Writer, str reflect.Value, model interface{}) error {
+func writeStructFields(writer *csv.Writer, str reflect.Value, dataModel interface{}) error {
 	sa := make([]string, str.NumField())
 	for i := 0; i < str.NumField(); i++ {
 		sa[i] = fmt.Sprintf("%v", str.Field(i))
