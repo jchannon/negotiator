@@ -35,11 +35,10 @@ func (p *txtProcessor) Process(w http.ResponseWriter, dataModel interface{}) err
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil
-
-	} else {
-		w.Header().Set("Content-Type", p.contentType)
-		return p.process(w, dataModel)
 	}
+
+	w.Header().Set("Content-Type", p.contentType)
+	return p.process(w, dataModel)
 }
 
 func (p *txtProcessor) process(w http.ResponseWriter, dataModel interface{}) error {
