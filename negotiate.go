@@ -49,14 +49,14 @@ func (n *Negotiator) Add(responseProcessors ...ResponseProcessor) *Negotiator {
 }
 
 // Negotiate your model based on the HTTP Accept header.
-func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
-	return negotiateHeader(n.processors, w, req, dataModel)
+func (n *Negotiator) Negotiate(w http.ResponseWriter, req *http.Request, dataModel interface{}, context ...interface{}) error {
+	return negotiateHeader(n.processors, w, req, dataModel, context...)
 }
 
 // Negotiate your model based on the HTTP Accept header. Only XML and JSON are handled.
-func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) error {
+func Negotiate(w http.ResponseWriter, req *http.Request, dataModel interface{}, context ...interface{}) error {
 	processors := []ResponseProcessor{NewJSON(), NewXML()}
-	return negotiateHeader(processors, w, req, model)
+	return negotiateHeader(processors, w, req, dataModel, context...)
 }
 
 // Firstly, all Ajax requests are processed by the first available Ajax processor.
@@ -74,34 +74,41 @@ func Negotiate(w http.ResponseWriter, req *http.Request, model interface{}) erro
 //
 // See rfc7231-sec5.3.2:
 // http://tools.ietf.org/html/rfc7231#section-5.3.2
-func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
+func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, dataModel interface{}, context ...interface{}) error {
+	if dataModel == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+
 	if IsAjax(req) {
 		for _, processor := range processors {
 			ajax, doesAjax := processor.(AjaxResponseProcessor)
 			if doesAjax && ajax.IsAjaxResponder() {
-				return processor.Process(w, req, dataModel)
+				return processor.Process(w, req, dataModel, context...)
 			}
 		}
 	}
 
 	accept := accept(req.Header.Get("Accept"))
 
-	if accept == "" {
-		return processors[0].Process(w, req, dataModel)
-	}
-
-	for _, mr := range accept.ParseMediaRanges() {
-		if len(mr.Value) == 0 {
-			continue
+	if len(processors) > 0 {
+		if accept == "" {
+			return processors[0].Process(w, req, dataModel, context...)
 		}
 
-		if strings.EqualFold(mr.Value, "*/*") {
-			return processors[0].Process(w, req, dataModel)
-		}
+		for _, mr := range accept.ParseMediaRanges() {
+			if len(mr.Value) == 0 {
+				continue
+			}
 
-		for _, processor := range processors {
-			if processor.CanProcess(mr.Value) {
-				return processor.Process(w, req, dataModel)
+			if strings.EqualFold(mr.Value, "*/*") {
+				return processors[0].Process(w, req, dataModel, context...)
+			}
+
+			for _, processor := range processors {
+				if processor.CanProcess(mr.Value) {
+					return processor.Process(w, req, dataModel, context...)
+				}
 			}
 		}
 	}

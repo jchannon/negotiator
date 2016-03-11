@@ -44,7 +44,7 @@ func TestShouldReturnDefaultProcessorIfNoAcceptHeader(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil)
+	negotiator.Negotiate(recorder, req, "foo")
 
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 }
@@ -64,6 +64,16 @@ func TestShouldGiveJSONResponseForAjaxRequests(t *testing.T) {
 	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}\n", recorder.Body.String())
 }
 
+func TestShouldReturn204IfDataModelIsNil(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/", nil)
+	req.Header.Add("Accept", "image/png")
+	recorder := httptest.NewRecorder()
+
+	Negotiate(recorder, req, nil)
+
+	assert.Equal(t, http.StatusNoContent, recorder.Code)
+}
+
 func TestShouldReturn406IfNoMatchingAcceptHeader(t *testing.T) {
 	var fakeResponseProcessor = &fakeProcessor{}
 	negotiator := New(fakeResponseProcessor)
@@ -72,7 +82,7 @@ func TestShouldReturn406IfNoMatchingAcceptHeader(t *testing.T) {
 	req.Header.Add("Accept", "image/png")
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil)
+	negotiator.Negotiate(recorder, req, "foo")
 
 	assert.Equal(t, http.StatusNotAcceptable, recorder.Code)
 }
@@ -94,7 +104,7 @@ func TestShouldNegotiateAndWriteToResponseBody(t *testing.T) {
 	req.Header.Add("Accept", "application/negotiatortesting")
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil)
+	negotiator.Negotiate(recorder, req, "foo")
 
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 }
@@ -107,7 +117,7 @@ func TestShouldNegotiateADefaultProcessor(t *testing.T) {
 	req.Header.Add("Accept", "*/*")
 	recorder := httptest.NewRecorder()
 
-	negotiator.Negotiate(recorder, req, nil)
+	negotiator.Negotiate(recorder, req, "foo")
 
 	assert.Equal(t, "boo ya!", recorder.Body.String())
 }
@@ -118,7 +128,7 @@ func (*fakeProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "application/negotiatortesting")
 }
 
-func (*fakeProcessor) Process(w http.ResponseWriter, req *http.Request, model interface{}) error {
+func (*fakeProcessor) Process(w http.ResponseWriter, req *http.Request, model interface{}, context ...interface{}) error {
 	w.Write([]byte("boo ya!"))
 	return nil
 }

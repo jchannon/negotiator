@@ -40,7 +40,7 @@ func (*xmlProcessor) CanProcess(mediaRange string) bool {
 	return strings.Contains(mediaRange, "/xml") || strings.HasSuffix(mediaRange, "+xml")
 }
 
-func (p *xmlProcessor) Process(w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
+func (p *xmlProcessor) Process(w http.ResponseWriter, req *http.Request, dataModel interface{}, context ...interface{}) error {
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil

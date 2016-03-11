@@ -48,7 +48,7 @@ func (*csvProcessor) CanProcess(mediaRange string) bool {
 	return strings.EqualFold(mediaRange, "text/csv") || strings.EqualFold(mediaRange, "text/*")
 }
 
-func (p *csvProcessor) Process(w http.ResponseWriter, req *http.Request, dataModel interface{}) error {
+func (p *csvProcessor) Process(w http.ResponseWriter, req *http.Request, dataModel interface{}, context ...interface{}) error {
 	if dataModel == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return nil
