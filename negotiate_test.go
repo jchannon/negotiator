@@ -64,16 +64,6 @@ func TestShouldGiveJSONResponseForAjaxRequests(t *testing.T) {
 	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}\n", recorder.Body.String())
 }
 
-func TestShouldReturn204IfDataModelIsNil(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
-	req.Header.Add("Accept", "image/png")
-	recorder := httptest.NewRecorder()
-
-	Negotiate(recorder, req, nil)
-
-	assert.Equal(t, http.StatusNoContent, recorder.Code)
-}
-
 func TestShouldReturn406IfNoMatchingAcceptHeader(t *testing.T) {
 	var fakeResponseProcessor = &fakeProcessor{}
 	negotiator := New(fakeResponseProcessor)

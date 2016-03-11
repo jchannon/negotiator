@@ -75,11 +75,6 @@ func Negotiate(w http.ResponseWriter, req *http.Request, dataModel interface{}, 
 // See rfc7231-sec5.3.2:
 // http://tools.ietf.org/html/rfc7231#section-5.3.2
 func negotiateHeader(processors []ResponseProcessor, w http.ResponseWriter, req *http.Request, dataModel interface{}, context ...interface{}) error {
-	if dataModel == nil {
-		w.WriteHeader(http.StatusNoContent)
-		return nil
-	}
-
 	if IsAjax(req) {
 		for _, processor := range processors {
 			ajax, doesAjax := processor.(AjaxResponseProcessor)
