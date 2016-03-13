@@ -60,7 +60,13 @@ func (p *csvProcessor) Process(w http.ResponseWriter, req *http.Request, dataMod
 	return p.flush(writer, p.process(writer, dataModel))
 }
 
+func debug(msg string, args ...interface{}) {
+	//fmt.Printf(msg, args...)
+}
+
 func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error {
+	debug("csvProcessor.process %T\n", dataModel)
+
 	switch v := dataModel.(type) {
 	case string:
 		return writer.Write([]string{v})
@@ -70,12 +76,8 @@ func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error 
 		return writer.WriteAll(v)
 	}
 
-	s, ok := dataModel.(fmt.Stringer)
-	if ok {
-		return writer.Write([]string{s.String()})
-	}
-
 	value := reflect.Indirect(reflect.ValueOf(dataModel))
+	debug("  is %v\n", value.Kind())
 
 	switch value.Kind() {
 	case reflect.Struct:
@@ -90,21 +92,20 @@ func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error 
 			return nil // nothing to write
 		}
 
-		v0 := value.Index(0)
+		v0 := reflect.Indirect(value.Index(0))
 		k0 := v0.Kind()
 
 		if reflect.Bool <= k0 && k0 <= reflect.Complex128 {
+			debug("    -- containing scalars\n")
 			return writeArrayOfScalars(writer, value)
 		}
 
 		switch k0 {
-		//case reflect.Interface:
-		//	fmt.Printf("----------- %v\n", v0)
-
 		case reflect.Struct:
 			if v0.NumField() == 0 {
 				return nil // nothing to write
 			}
+			debug("    -- v0 is Struct\n")
 
 			_, ok := v0.Interface().(fmt.Stringer)
 			if ok {
@@ -117,9 +118,11 @@ func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error 
 			if v0.Len() == 0 {
 				return nil // nothing to write
 			}
+			debug("    -- v0 is Array/Slice\n")
 
-			v00 := v0.Index(0)
+			v00 := reflect.Indirect(v0.Index(0))
 			k00 := v00.Kind()
+			debug("      -- v00 is %v\n", k00)
 
 			if reflect.Bool <= k00 && k00 <= reflect.Complex128 {
 				return write2DArrayOfScalars(writer, value)
@@ -130,7 +133,15 @@ func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error 
 					return write2DArrayOfStringers(writer, value)
 				}
 			}
+
+		default:
+			debug("  -- v0 is %v -- ignored\n", k0)
 		}
+	}
+
+	s, ok := dataModel.(fmt.Stringer)
+	if ok {
+		return writer.Write([]string{s.String()})
 	}
 
 	return fmt.Errorf("Unsupported type for CSV: %T", dataModel)
@@ -138,7 +149,7 @@ func (p *csvProcessor) process(writer *csv.Writer, dataModel interface{}) error 
 
 func writeArrayOfStructFields(writer *csv.Writer, value reflect.Value, dataModel interface{}) error {
 	for j := 0; j < value.Len(); j++ {
-		err := writeStructFields(writer, value.Index(j), dataModel)
+		err := writeStructFields(writer, reflect.Indirect(value.Index(j)), dataModel)
 		if err != nil {
 			return err
 		}
@@ -149,14 +160,15 @@ func writeArrayOfStructFields(writer *csv.Writer, value reflect.Value, dataModel
 func writeStructFields(writer *csv.Writer, str reflect.Value, dataModel interface{}) error {
 	sa := make([]string, str.NumField())
 	for i := 0; i < str.NumField(); i++ {
-		sa[i] = fmt.Sprintf("%v", str.Field(i))
+		sa[i] = fmt.Sprintf("%v", reflect.Indirect(str.Field(i)))
 	}
 	return writer.Write(sa)
 }
 
 func write2DArrayOfStringers(writer *csv.Writer, value reflect.Value) error {
+	debug("        -- write2DArrayOfStringers %d\n", value.Len())
 	for j := 0; j < value.Len(); j++ {
-		err := writeArrayOfStringers(writer, value.Index(j))
+		err := writeArrayOfStringers(writer, reflect.Indirect(value.Index(j)))
 		if err != nil {
 			return err
 		}
@@ -165,16 +177,17 @@ func write2DArrayOfStringers(writer *csv.Writer, value reflect.Value) error {
 }
 
 func writeArrayOfStringers(writer *csv.Writer, value reflect.Value) error {
+	debug("        -- writeArrayOfStringers %d\n", value.Len())
 	sa := make([]string, value.Len())
 	for i := 0; i < value.Len(); i++ {
-		sa[i] = fmt.Sprintf("%v", value.Index(i).Interface().(fmt.Stringer))
+		sa[i] = fmt.Sprintf("%v", reflect.Indirect(value.Index(i)).Interface().(fmt.Stringer))
 	}
 	return writer.Write(sa)
 }
 
 func write2DArrayOfScalars(writer *csv.Writer, value reflect.Value) error {
 	for j := 0; j < value.Len(); j++ {
-		err := writeArrayOfScalars(writer, value.Index(j))
+		err := writeArrayOfScalars(writer, reflect.Indirect(value.Index(j)))
 		if err != nil {
 			return err
 		}
@@ -185,7 +198,7 @@ func write2DArrayOfScalars(writer *csv.Writer, value reflect.Value) error {
 func writeArrayOfScalars(writer *csv.Writer, vj reflect.Value) error {
 	sa := make([]string, vj.Len())
 	for i := 0; i < vj.Len(); i++ {
-		sa[i] = fmt.Sprintf("%v", vj.Index(i))
+		sa[i] = fmt.Sprintf("%v", reflect.Indirect(vj.Index(i)))
 	}
 	return writer.Write(sa)
 }
