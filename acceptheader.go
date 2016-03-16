@@ -22,14 +22,12 @@ const (
 )
 
 // Accept is an http accept
-type accept struct {
-	Header string
-}
+type accept string
 
 // MediaRanges returns prioritized media ranges
-func (accept *accept) ParseMediaRanges() []weightedValue {
+func (accept accept) ParseMediaRanges() []weightedValue {
 	var retVals []weightedValue
-	mrs := strings.Split(accept.Header, ",")
+	mrs := strings.Split(string(accept), ",")
 
 	for _, mr := range mrs {
 		mrAndAcceptParam := strings.Split(mr, ";")
@@ -58,8 +56,9 @@ func handleMediaRangeWithAcceptParams(mediaRange string, acceptParams []string) 
 	wv.Weight = ParameteredMediaRangeWeight
 
 	for index := 0; index < len(acceptParams); index++ {
-		if isQualityAcceptParam(acceptParams[index]) {
-			wv.Weight = parseQuality(acceptParams[index])
+		ap := strings.ToLower(acceptParams[index])
+		if isQualityAcceptParam(ap) {
+			wv.Weight = parseQuality(ap)
 		} else {
 			wv.Value = strings.Join([]string{wv.Value, acceptParams[index]}, ";")
 		}
@@ -84,7 +83,7 @@ func handleMediaRangeNoAcceptParams(mediaRange string) weightedValue {
 	wv.Value = strings.TrimSpace(mediaRange)
 	wv.Weight = 0.0
 
-	typeSubtype := strings.Split(mediaRange, "/")
+	typeSubtype := strings.Split(wv.Value, "/")
 	if len(typeSubtype) == 2 {
 		switch {
 		//a type of * with a non-star subtype is invalid, so if the type is

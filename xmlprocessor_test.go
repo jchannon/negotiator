@@ -10,59 +10,101 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldProcessXMLAcceptHeader(t *testing.T) {
+func TestXMLShouldProcessAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
+		expected     bool
 	}{
-		{"application/xml"},
+		{"application/xml", true},
+		{"application/xml-dtd", true},
+		{"application/CEA", false},
+		{"image/svg+xml", true},
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	processor := NewXML()
 
 	for _, tt := range acceptTests {
-		result := xmlProcessor.CanProcess(tt.acceptheader)
-		assert.True(t, result, "Should process "+tt.acceptheader)
+		result := processor.CanProcess(tt.acceptheader)
+		assert.Equal(t, tt.expected, result, "Should process "+tt.acceptheader)
 	}
 }
 
-func TestShouldSetXmlContentTypeHeader(t *testing.T) {
+func TestXMLShouldReturnNoContentIfNil(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	processor := NewXML()
+
+	processor.Process(recorder, nil, nil)
+
+	assert.Equal(t, 204, recorder.Code)
+}
+
+func TestXMLShouldSetDefaultContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &ValidXMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	processor := NewXML()
 
-	xmlProcessor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
 	assert.Equal(t, "application/xml", recorder.HeaderMap.Get("Content-Type"))
 }
 
-func TestShouldSetXmlResponseBody(t *testing.T) {
+func TestXMLShouldSetContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &ValidXMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	processor := NewXML().(ContentTypeSettable).SetContentType("image/svg+xml")
 
-	xmlProcessor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
-	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>", recorder.Body.String())
+	assert.Equal(t, "image/svg+xml", recorder.HeaderMap.Get("Content-Type"))
 }
 
-func TestShouldReturnErrorOnXmlError(t *testing.T) {
+func TestXMLShouldSetResponseBody(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := &ValidXMLUser{
+		"Joe Bloggs",
+	}
+
+	processor := NewXML()
+
+	processor.Process(recorder, nil, model)
+
+	assert.Equal(t, "<ValidXMLUser><Name>Joe Bloggs</Name></ValidXMLUser>", recorder.Body.String())
+}
+
+func TestXMlShouldSetResponseBodyWithIndentation(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := &ValidXMLUser{
+		"Joe Bloggs",
+	}
+
+	processor := NewXMLIndent2Spaces()
+
+	processor.Process(recorder, nil, model)
+
+	assert.Equal(t, "<ValidXMLUser>\n  <Name>Joe Bloggs</Name>\n</ValidXMLUser>\n", recorder.Body.String())
+}
+
+func TestXMLShouldReturnErrorOnError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &XMLUser{
 		"Joe Bloggs",
 	}
 
-	xmlProcessor := &xmlProcessor{}
+	processor := NewXMLIndent2Spaces()
 
-	err := xmlProcessor.Process(recorder, model)
+	err := processor.Process(recorder, nil, model)
 
 	assert.Error(t, err)
 }

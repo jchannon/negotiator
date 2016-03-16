@@ -9,24 +9,42 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldProcessJSONAcceptHeader(t *testing.T) {
+func TestJSONShouldProcessAcceptHeader(t *testing.T) {
 	var acceptTests = []struct {
 		acceptheader string
+		expected     bool
 	}{
-		{"application/json"},
-		{"application/json-"},
-		{"+json"},
+		{"application/json", true},
+		{"application/json-", true},
+		{"application/CEA", false},
+		{"+json", true},
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	processor := NewJSON()
 
 	for _, tt := range acceptTests {
-		result := jsonProcessor.CanProcess(tt.acceptheader)
-		assert.True(t, result, "Should process "+tt.acceptheader)
+		result := processor.CanProcess(tt.acceptheader)
+		assert.Equal(t, tt.expected, result, "Should process "+tt.acceptheader)
 	}
 }
 
-func TestShouldSetContentTypeHeader(t *testing.T) {
+func TestJSONShouldReturnNoContentIfNil(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	processor := NewJSON()
+
+	processor.Process(recorder, nil, nil)
+
+	assert.Equal(t, 204, recorder.Code)
+}
+
+func TestJSONShouldHandleAjax(t *testing.T) {
+	processor := NewJSON()
+
+	assert.True(t, processor.(AjaxResponseProcessor).IsAjaxResponder())
+}
+
+func TestJSONShouldSetDefaultContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := struct {
@@ -35,14 +53,14 @@ func TestShouldSetContentTypeHeader(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	processor := NewJSON()
 
-	jsonProcessor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
 	assert.Equal(t, "application/json", recorder.HeaderMap.Get("Content-Type"))
 }
 
-func TestShouldSetResponseBody(t *testing.T) {
+func TestJSONShouldSetContentTypeHeader(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := struct {
@@ -51,23 +69,55 @@ func TestShouldSetResponseBody(t *testing.T) {
 		"Joe Bloggs",
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	processor := NewJSON().(ContentTypeSettable).SetContentType("application/calendar+json")
 
-	jsonProcessor.Process(recorder, model)
+	processor.Process(recorder, nil, model)
 
-	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}", recorder.Body.String())
+	assert.Equal(t, "application/calendar+json", recorder.HeaderMap.Get("Content-Type"))
 }
 
-func TestShouldReturnErrorOnJsonError(t *testing.T) {
+func TestJSONShouldSetResponseBody(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := struct {
+		Name string
+	}{
+		"Joe Bloggs",
+	}
+
+	processor := NewJSON()
+
+	processor.Process(recorder, nil, model)
+
+	assert.Equal(t, "{\"Name\":\"Joe Bloggs\"}\n", recorder.Body.String())
+}
+
+func TestJSONShouldSetResponseBodyWithIndentation(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	model := struct {
+		Name string
+	}{
+		"Joe Bloggs",
+	}
+
+	processor := NewJSONIndent2Spaces()
+
+	processor.Process(recorder, nil, model)
+
+	assert.Equal(t, "{\n  \"Name\": \"Joe Bloggs\"\n}\n", recorder.Body.String())
+}
+
+func TestJSONShouldReturnErrorOnError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	model := &User{
 		"Joe Bloggs",
 	}
 
-	jsonProcessor := &jsonProcessor{}
+	processor := NewJSON()
 
-	err := jsonProcessor.Process(recorder, model)
+	err := processor.Process(recorder, nil, model)
 
 	assert.Error(t, err)
 }
